@@ -1,0 +1,12 @@
+name: XPWorldBorder
+version: '${version}'
+main: dev.potato.xpworldborder.XPWorldBorder
+api-version: '1.20'
+authors: [Potato, Masterwyatt]
+description: A plugin where your XP is equal to how big the world border is!
+commands:
+  togglesound:
+    description: Allows players to toggle the plugin sounds on/off
+    usage: /togglesound [sound name]
+    aliases:
+      - ts

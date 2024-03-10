@@ -1,0 +1,8 @@
+# When this is enabled, when a player leaves, the border will shrink
+# The amount the border shrinks will depend on how many levels the player had
+# Otherwise, levels will be stored persistently
+update-border-on-leave: false
+
+# This value only matters if you have the option above set to FALSE
+# When this is enabled, offline players with their levels stored will have their levels wiped after 24 hours of being inactive
+wipe-old-level-data: true
