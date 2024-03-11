@@ -4,5 +4,20 @@
 update-border-on-leave: false
 
 # This value only matters if you have the option above set to FALSE
-# When this is enabled, offline players with their levels stored will have their levels wiped after 24 hours of being inactive
+# When this is enabled, offline players with their levels stored will have their levels wiped after a certain amount of time
+# Wiping level data won't remove a player's in-game level, but it will shrink the border
 wipe-old-level-data: true
+
+# Similarly, this value only matters if the option above is set to TRUE
+# This is the time, in SECONDS, that a player has to be offline for in order for their levels to be wiped
+# The default is 172800 (2 days)
+time-before-wipe: 172800
+
+# If true, the plugin will broadcast a notifying message to all players when a player's level data is wiped
+should-notify-players-on-wipe: true
+
+# If true, the amount of levels the player had before they died will be displayed at the end of every death message
+should-change-death-message: true
+
+# If true, all players will be able to see the amount of levels all other players have when holding tab and looking at the player list
+should-display-levels-in-tab: true

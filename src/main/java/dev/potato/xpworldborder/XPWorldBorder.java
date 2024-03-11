@@ -1,12 +1,14 @@
 package dev.potato.xpworldborder;
 
 import dev.potato.xpworldborder.commands.ToggleSoundCommand;
+import dev.potato.xpworldborder.configurations.LangConfig;
 import dev.potato.xpworldborder.configurations.LevelConfig;
 import dev.potato.xpworldborder.configurations.SetupConfig;
 import dev.potato.xpworldborder.configurations.SoundConfig;
 import dev.potato.xpworldborder.listeners.PlayerXPListeners;
 import dev.potato.xpworldborder.tasks.OfflinePlayerLevelCheckTask;
 import dev.potato.xpworldborder.utilities.enumerations.configurations.ConfigKeys;
+import dev.potato.xpworldborder.utilities.enumerations.configurations.LangConfigKeys;
 import dev.potato.xpworldborder.utilities.enumerations.configurations.SetupConfigKeys;
 import dev.potato.xpworldborder.utilities.enumerations.configurations.SoundConfigKeys;
 import org.bukkit.Bukkit;
@@ -16,6 +18,7 @@ import org.bukkit.WorldBorder;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.io.File;
 import java.util.ArrayList;
 
 public final class XPWorldBorder extends JavaPlugin {
@@ -47,6 +50,9 @@ public final class XPWorldBorder extends JavaPlugin {
         getConfig().options().copyDefaults(true);
         saveDefaultConfig();
 
+        // Custom Config Directory
+        new File(getDataFolder().getAbsolutePath() + "\\data").mkdirs();
+
         // Setup.yml
         SetupConfig.setup();
         FileConfiguration setupConfig = SetupConfig.getConfig();
@@ -67,6 +73,23 @@ public final class XPWorldBorder extends JavaPlugin {
         FileConfiguration levelConfig = LevelConfig.getConfig();
         levelConfig.options().copyDefaults(true);
         LevelConfig.save();
+
+        // Lang.yml
+        LangConfig.setup();
+        FileConfiguration langConfig = LangConfig.getConfig();
+
+        langConfig.addDefault(LangConfigKeys.PLUGIN_PREFIX.KEY, "&2&l[XP World Border]&r");
+        langConfig.addDefault(LangConfigKeys.LEFT_WHILE_OUTSIDE_BORDER.KEY, "&cYou left while outside the world border! You have been killed and sent back to spawn.");
+        langConfig.addDefault(LangConfigKeys.LEFT_AND_BORDER_SHRUNK.KEY, "&aThe world border shrunk while you were gone! You've been teleported to the world's center.");
+        langConfig.addDefault(LangConfigKeys.ALL_SOUNDS_ENABLED.KEY, "&aAll world border sounds have now been enabled!");
+        langConfig.addDefault(LangConfigKeys.ALL_SOUNDS_DISABLED.KEY, "&cAll world border sounds have now been disabled!");
+        langConfig.addDefault(LangConfigKeys.INCREASE_SOUNDS_ENABLED.KEY, "&aWorld border increase sounds have now been enabled!");
+        langConfig.addDefault(LangConfigKeys.INCREASE_SOUNDS_DISABLED.KEY, "&cWorld border increase sounds have now been disabled!");
+        langConfig.addDefault(LangConfigKeys.DECREASE_SOUNDS_ENABLED.KEY, "&aWorld border decrease sounds have now been enabled!");
+        langConfig.addDefault(LangConfigKeys.DECREASE_SOUNDS_DISABLED.KEY, "&cWorld border decrease sounds have now been disabled!");
+
+        langConfig.options().copyDefaults(true);
+        LangConfig.save();
     }
 
     private void initializeWorlds() {

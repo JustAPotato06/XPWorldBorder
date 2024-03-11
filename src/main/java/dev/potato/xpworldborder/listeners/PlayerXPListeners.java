@@ -2,6 +2,7 @@ package dev.potato.xpworldborder.listeners;
 
 import dev.potato.xpworldborder.XPWorldBorder;
 import dev.potato.xpworldborder.configurations.LevelConfig;
+import dev.potato.xpworldborder.utilities.LangUtilities;
 import dev.potato.xpworldborder.utilities.WorldBorderUtilities;
 import dev.potato.xpworldborder.utilities.enumerations.PersistentDataContainerKeys;
 import dev.potato.xpworldborder.utilities.enumerations.WorldDataKeys;
@@ -39,7 +40,11 @@ public class PlayerXPListeners implements Listener {
         LevelConfig.getConfig().set(player.getUniqueId() + "." + LevelConfigKeys.TIME_LAST_LEFT.KEY, System.currentTimeMillis());
 
         worldBorderManager.updateBorders();
-        worldBorderManager.givePlayerScoreboard(player);
+
+        boolean shouldDisplayLevelsInTab = plugin.getConfig().getBoolean(ConfigKeys.SHOULD_DISPLAY_LEVELS_IN_TAB.KEY);
+        if (shouldDisplayLevelsInTab) {
+            worldBorderManager.givePlayerScoreboard(player);
+        }
     }
 
     private void handlePlayerOutsideBorder(Player player) {
@@ -48,17 +53,19 @@ public class PlayerXPListeners implements Listener {
 
         if (isPlayerOutsideBorder(player)) {
             PersistentDataContainer playerData = player.getPersistentDataContainer();
-            boolean shouldKill = playerData.get(PersistentDataContainerKeys.SHOULD_KILL_ON_JOIN.KEY, PersistentDataType.BOOLEAN);
-            if (shouldKill) {
-                player.setHealth(0);
-                player.sendMessage(Component.text("[XP World Border] You left while outside the world border! You have been killed and sent back to spawn.", NamedTextColor.RED));
-                playerData.set(PersistentDataContainerKeys.SHOULD_KILL_ON_JOIN.KEY, PersistentDataType.BOOLEAN, false);
-                return;
+            if (playerData.has(PersistentDataContainerKeys.SHOULD_KILL_ON_JOIN.KEY)) {
+                boolean shouldKill = playerData.get(PersistentDataContainerKeys.SHOULD_KILL_ON_JOIN.KEY, PersistentDataType.BOOLEAN);
+                if (shouldKill) {
+                    player.setHealth(0);
+                    player.sendMessage(LangUtilities.PLUGIN_PREFIX.append(Component.text(" ").append(LangUtilities.LEFT_WHILE_OUTSIDE_BORDER)));
+                    playerData.set(PersistentDataContainerKeys.SHOULD_KILL_ON_JOIN.KEY, PersistentDataType.BOOLEAN, false);
+                    return;
+                }
             }
             Location borderCenter = playerWorldBorder.getCenter();
             Block highestBlock = playerWorld.getHighestBlockAt(borderCenter);
             player.teleport(highestBlock.getLocation());
-            player.sendMessage(Component.text("[XP World Border] The world border shrunk while you left! You've been teleported to the world's center.", NamedTextColor.GREEN));
+            player.sendMessage(LangUtilities.PLUGIN_PREFIX.append(Component.text(" ").append(LangUtilities.LEFT_AND_BORDER_SHRUNK)));
         }
     }
 
@@ -109,6 +116,8 @@ public class PlayerXPListeners implements Listener {
 
     @EventHandler
     public void onPlayerDeath(PlayerDeathEvent e) {
+        boolean shouldChangeDeathMessage = plugin.getConfig().getBoolean(ConfigKeys.SHOULD_CHANGE_DEATH_MESSAGE.KEY);
+        if (!shouldChangeDeathMessage) return;
         Component deathMessage = e.deathMessage()
                 .append(Component.text(". They had ")
                         .append(Component.text(e.getPlayer().getLevel(), NamedTextColor.GREEN)

@@ -18,12 +18,12 @@ public class SoundConfig {
     }
 
     public static void setup() {
-        file = new File(Bukkit.getServer().getPluginManager().getPlugin("XPWorldBorder").getDataFolder(), "sound.yml");
+        file = new File(Bukkit.getServer().getPluginManager().getPlugin("XPWorldBorder").getDataFolder(), "data\\sound.yml");
         if (!file.exists()) {
             try {
                 file.createNewFile();
             } catch (IOException e) {
-                Bukkit.getConsoleSender().sendMessage(Component.text("[XP World Border] Could not create sound.yml!", NamedTextColor.RED));
+                Bukkit.getConsoleSender().sendMessage(Component.text("Could not create sound.yml!", NamedTextColor.RED));
             }
         }
         config = YamlConfiguration.loadConfiguration(file);
@@ -33,7 +33,7 @@ public class SoundConfig {
         try {
             config.save(file);
         } catch (IOException e) {
-            Bukkit.getConsoleSender().sendMessage(Component.text("[XP World Border] Could not save sound.yml!", NamedTextColor.RED));
+            Bukkit.getConsoleSender().sendMessage(Component.text("Could not save sound.yml!", NamedTextColor.RED));
         }
     }
 }

@@ -1,9 +1,10 @@
 package dev.potato.xpworldborder.commands;
 
 import dev.potato.xpworldborder.configurations.SoundConfig;
+import dev.potato.xpworldborder.utilities.LangUtilities;
 import dev.potato.xpworldborder.utilities.enumerations.configurations.SoundConfigKeys;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
@@ -18,7 +19,7 @@ import java.util.List;
 public class ToggleSoundCommand implements TabExecutor {
     private final String BORDER_INCREASE = "border-increase";
     private final String BORDER_DECREASE = "border-decrease";
-    private final Component INCORRECT_USAGE = Component.text("[XP World Border] Incorrect usage! Example: /togglesound [sound name]", NamedTextColor.RED);
+    private final Component INCORRECT_USAGE = LangUtilities.PLUGIN_PREFIX.append(LegacyComponentSerializer.legacy('&').deserialize(" &c&rIncorrect usage! Example: /togglesound [sound name]"));
 
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
@@ -55,11 +56,11 @@ public class ToggleSoundCommand implements TabExecutor {
         if (currentIncreasePlayers.contains(player.getName()) || currentDecreasePlayers.contains(player.getName())) {
             currentIncreasePlayers.remove(player.getName());
             currentDecreasePlayers.remove(player.getName());
-            player.sendMessage(Component.text("[XP World Border] All world border sounds have now been enabled!", NamedTextColor.GREEN));
+            player.sendMessage(LangUtilities.PLUGIN_PREFIX.append(Component.text(" ").append(LangUtilities.ALL_SOUNDS_ENABLED)));
         } else {
             currentIncreasePlayers.add(player.getName());
             currentDecreasePlayers.add(player.getName());
-            player.sendMessage(Component.text("[XP World Border] All world border sounds have now been disabled!", NamedTextColor.RED));
+            player.sendMessage(LangUtilities.PLUGIN_PREFIX.append(Component.text(" ").append(LangUtilities.ALL_SOUNDS_DISABLED)));
         }
 
         soundConfig.set(SoundConfigKeys.NO_SOUND_INCREASE.KEY, currentIncreasePlayers);
@@ -72,10 +73,10 @@ public class ToggleSoundCommand implements TabExecutor {
         List<String> currentPlayers = (List<String>) soundConfig.getList(SoundConfigKeys.NO_SOUND_INCREASE.KEY);
         if (currentPlayers.contains(player.getName())) {
             currentPlayers.remove(player.getName());
-            player.sendMessage(Component.text("[XP World Border] World border increase sounds have now been enabled!", NamedTextColor.GREEN));
+            player.sendMessage(LangUtilities.PLUGIN_PREFIX.append(Component.text(" ").append(LangUtilities.INCREASE_SOUNDS_ENABLED)));
         } else {
             currentPlayers.add(player.getName());
-            player.sendMessage(Component.text("[XP World Border] World border increase sounds have now been disabled!", NamedTextColor.RED));
+            player.sendMessage(LangUtilities.PLUGIN_PREFIX.append(Component.text(" ").append(LangUtilities.INCREASE_SOUNDS_DISABLED)));
         }
         soundConfig.set(SoundConfigKeys.NO_SOUND_INCREASE.KEY, currentPlayers);
         SoundConfig.save();
@@ -86,10 +87,10 @@ public class ToggleSoundCommand implements TabExecutor {
         List<String> currentPlayers = (List<String>) soundConfig.getList(SoundConfigKeys.NO_SOUND_DECREASE.KEY);
         if (currentPlayers.contains(player.getName())) {
             currentPlayers.remove(player.getName());
-            player.sendMessage(Component.text("[XP World Border] World border decrease sounds have now been enabled!", NamedTextColor.GREEN));
+            player.sendMessage(LangUtilities.PLUGIN_PREFIX.append(Component.text(" ").append(LangUtilities.DECREASE_SOUNDS_ENABLED)));
         } else {
             currentPlayers.add(player.getName());
-            player.sendMessage(Component.text("[XP World Border] World border decrease sounds have now been disabled!", NamedTextColor.RED));
+            player.sendMessage(LangUtilities.PLUGIN_PREFIX.append(Component.text(" ").append(LangUtilities.DECREASE_SOUNDS_DISABLED)));
         }
         soundConfig.set(SoundConfigKeys.NO_SOUND_DECREASE.KEY, currentPlayers);
         SoundConfig.save();

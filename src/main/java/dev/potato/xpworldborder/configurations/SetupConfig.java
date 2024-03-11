@@ -18,12 +18,12 @@ public class SetupConfig {
     }
 
     public static void setup() {
-        file = new File(Bukkit.getServer().getPluginManager().getPlugin("XPWorldBorder").getDataFolder(), "setup.yml");
+        file = new File(Bukkit.getServer().getPluginManager().getPlugin("XPWorldBorder").getDataFolder(), "data\\setup.yml");
         if (!file.exists()) {
             try {
                 file.createNewFile();
             } catch (IOException e) {
-                Bukkit.getConsoleSender().sendMessage(Component.text("[XP World Border] Could not create setup.yml!", NamedTextColor.RED));
+                Bukkit.getConsoleSender().sendMessage(Component.text("Could not create setup.yml!", NamedTextColor.RED));
             }
         }
         config = YamlConfiguration.loadConfiguration(file);
@@ -33,7 +33,7 @@ public class SetupConfig {
         try {
             config.save(file);
         } catch (IOException e) {
-            Bukkit.getConsoleSender().sendMessage(Component.text("[XP World Border] Could not save setup.yml!", NamedTextColor.RED));
+            Bukkit.getConsoleSender().sendMessage(Component.text("Could not save setup.yml!", NamedTextColor.RED));
         }
     }
 }
