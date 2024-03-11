@@ -17,8 +17,8 @@ public class LangConfig {
         return config;
     }
 
-    public static void setup() {
-        file = new File(Bukkit.getServer().getPluginManager().getPlugin("XPWorldBorder").getDataFolder(), "lang.yml");
+    public static void setup(File dataFolder) {
+        file = new File(dataFolder, "lang.yml");
         if (!file.exists()) {
             try {
                 file.createNewFile();

@@ -17,8 +17,8 @@ public class SoundConfig {
         return config;
     }
 
-    public static void setup() {
-        file = new File(Bukkit.getServer().getPluginManager().getPlugin("XPWorldBorder").getDataFolder(), "data\\sound.yml");
+    public static void setup(File dataFolder) {
+        file = new File(dataFolder, "sound.yml");
         if (!file.exists()) {
             try {
                 file.createNewFile();

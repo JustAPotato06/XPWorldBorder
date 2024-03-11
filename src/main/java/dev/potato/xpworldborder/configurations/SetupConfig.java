@@ -17,8 +17,8 @@ public class SetupConfig {
         return config;
     }
 
-    public static void setup() {
-        file = new File(Bukkit.getServer().getPluginManager().getPlugin("XPWorldBorder").getDataFolder(), "data\\setup.yml");
+    public static void setup(File dataFolder) {
+        file = new File(dataFolder, "setup.yml");
         if (!file.exists()) {
             try {
                 file.createNewFile();

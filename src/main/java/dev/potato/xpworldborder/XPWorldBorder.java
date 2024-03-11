@@ -46,22 +46,21 @@ public final class XPWorldBorder extends JavaPlugin {
     }
 
     private void initializeConfiguration() {
+        File dataFolder = getDataFolder();
+
         // Config.yml
         getConfig().options().copyDefaults(true);
         saveDefaultConfig();
 
-        // Custom Config Directory
-        new File(getDataFolder().getAbsolutePath() + "\\data").mkdirs();
-
         // Setup.yml
-        SetupConfig.setup();
+        SetupConfig.setup(dataFolder);
         FileConfiguration setupConfig = SetupConfig.getConfig();
         setupConfig.addDefault(SetupConfigKeys.SHOULD_INITIALIZE.KEY, true);
         setupConfig.options().copyDefaults(true);
         SetupConfig.save();
 
         // Sound.yml
-        SoundConfig.setup();
+        SoundConfig.setup(dataFolder);
         FileConfiguration soundConfig = SoundConfig.getConfig();
         soundConfig.addDefault(SoundConfigKeys.NO_SOUND_INCREASE.KEY, new ArrayList<>());
         soundConfig.addDefault(SoundConfigKeys.NO_SOUND_DECREASE.KEY, new ArrayList<>());
@@ -69,13 +68,13 @@ public final class XPWorldBorder extends JavaPlugin {
         SoundConfig.save();
 
         // Levels.yml
-        LevelConfig.setup();
+        LevelConfig.setup(dataFolder);
         FileConfiguration levelConfig = LevelConfig.getConfig();
         levelConfig.options().copyDefaults(true);
         LevelConfig.save();
 
         // Lang.yml
-        LangConfig.setup();
+        LangConfig.setup(dataFolder);
         FileConfiguration langConfig = LangConfig.getConfig();
 
         langConfig.addDefault(LangConfigKeys.PLUGIN_PREFIX.KEY, "&2&l[XP World Border]&r");

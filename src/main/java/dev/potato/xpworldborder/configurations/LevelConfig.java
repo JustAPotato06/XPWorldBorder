@@ -17,8 +17,8 @@ public class LevelConfig {
         return config;
     }
 
-    public static void setup() {
-        file = new File(Bukkit.getServer().getPluginManager().getPlugin("XPWorldBorder").getDataFolder(), "data\\levels.yml");
+    public static void setup(File dataFolder) {
+        file = new File(dataFolder, "levels.yml");
         if (!file.exists()) {
             try {
                 file.createNewFile();
