@@ -87,10 +87,6 @@ public class Quadrant {
         return quadrant;
     }
 
-    public static Location getHighestPoint(Location location) {
-        return location.toHighestLocation().add(0, 2, 0);
-    }
-
     public double getDistanceX() {
         return Math.abs(initialLocation.getX() - center.getX());
     }

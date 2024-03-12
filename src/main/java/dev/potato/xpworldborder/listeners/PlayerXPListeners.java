@@ -2,7 +2,6 @@ package dev.potato.xpworldborder.listeners;
 
 import dev.potato.xpworldborder.XPWorldBorder;
 import dev.potato.xpworldborder.configurations.LevelConfig;
-import dev.potato.xpworldborder.models.Quadrant;
 import dev.potato.xpworldborder.utilities.LangUtilities;
 import dev.potato.xpworldborder.utilities.WorldBorderUtilities;
 import dev.potato.xpworldborder.utilities.enumerations.PersistentDataContainerKeys;
@@ -11,7 +10,6 @@ import dev.potato.xpworldborder.utilities.enumerations.configurations.ConfigKeys
 import dev.potato.xpworldborder.utilities.enumerations.configurations.LevelConfigKeys;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.WorldBorder;
 import org.bukkit.block.Block;
@@ -43,18 +41,14 @@ public class PlayerXPListeners implements Listener {
         worldBorderManager.updateBorders();
 
         boolean shouldDisplayLevelsInTab = plugin.getConfig().getBoolean(ConfigKeys.SHOULD_DISPLAY_LEVELS_IN_TAB.KEY);
+
         if (shouldDisplayLevelsInTab) {
             worldBorderManager.givePlayerScoreboard(player);
         }
     }
 
     private void handlePlayerOutsideBorder(Player player) {
-        World world = player.getWorld();
-        Location location = player.getLocation();
-        WorldBorder worldBorder = world.getWorldBorder();
-        Location worldBorderCenter = worldBorder.getCenter();
-
-        if (!isLocationOutsideBorder(location)) return;
+        if (!worldBorderManager.isLocationOutsideBorder(player.getLocation())) return;
 
         PersistentDataContainer playerData = player.getPersistentDataContainer();
         if (playerData.has(PersistentDataContainerKeys.SHOULD_KILL_ON_JOIN.KEY)) {
@@ -67,37 +61,15 @@ public class PlayerXPListeners implements Listener {
             }
         }
 
-        Quadrant playerQuadrant = Quadrant.getQuadrant(location, worldBorderCenter);
-        Location closestSafeLocation = location;
-        for (int i = 0; i < playerQuadrant.getDiagonalDistance(); i++) {
-            closestSafeLocation = switch (playerQuadrant.getQuadrantType()) {
-                case POS_POS -> location.subtract(i, 0, i);
-                case POS_NEG -> location.subtract(i, 0, 0).add(0, 0, i);
-                case NEG_NEG -> location.add(i, 0, i);
-                case NEG_POS -> location.add(i, 0, 0).subtract(0, 0, i);
-                default -> location;
-            };
-            if (!isLocationOutsideBorder(closestSafeLocation)) break;
-        }
-        player.teleport(Quadrant.getHighestPoint(closestSafeLocation).add(1, 0, 1));
+        worldBorderManager.tpPlayerToNearestInBorderBlock(player);
         player.sendMessage(LangUtilities.PLUGIN_PREFIX.append(Component.text(" ").append(LangUtilities.LEFT_AND_BORDER_SHRUNK)));
-    }
-
-    private boolean isLocationOutsideBorder(Location location) {
-        World world = location.getWorld();
-        WorldBorder worldBorder = world.getWorldBorder();
-        Location worldBorderCenter = worldBorder.getCenter();
-        double radius = (worldBorder.getSize() / 2) + 1;
-        double distanceX = location.getX() - worldBorderCenter.getX();
-        double distanceZ = location.getZ() - worldBorderCenter.getZ();
-        return ((distanceX > radius || -distanceX > radius) || (distanceZ > radius || -distanceZ > radius));
     }
 
     @EventHandler
     public void onPlayerLeave(PlayerQuitEvent e) {
         Player player = e.getPlayer();
 
-        if (isLocationOutsideBorder(player.getLocation())) {
+        if (worldBorderManager.isLocationOutsideBorder(player.getLocation())) {
             PersistentDataContainer playerData = player.getPersistentDataContainer();
             playerData.set(PersistentDataContainerKeys.SHOULD_KILL_ON_JOIN.KEY, PersistentDataType.BOOLEAN, true);
         }
@@ -146,7 +118,7 @@ public class PlayerXPListeners implements Listener {
             public void run() {
                 Player player = e.getPlayer();
                 Block highestBlock = player.getWorld().getHighestBlockAt(player.getLocation());
-                player.teleport(highestBlock.getLocation());
+                player.teleport(highestBlock.getLocation().add(0, 1, 0));
             }
         }.runTaskLater(plugin, 10);
     }
@@ -154,13 +126,9 @@ public class PlayerXPListeners implements Listener {
     @EventHandler
     public void onPlayerWorldChange(PlayerChangedWorldEvent e) {
         Player player = e.getPlayer();
-
-        World previousWorld = e.getFrom();
-        WorldBorder previousWorldBorder = previousWorld.getWorldBorder();
-
+        WorldBorder previousWorldBorder = e.getFrom().getWorldBorder();
         World currentWorld = player.getWorld();
         WorldBorder currentWorldBorder = currentWorld.getWorldBorder();
-
         PersistentDataContainer currentWorldData = currentWorld.getPersistentDataContainer();
         boolean isInitialized = currentWorldData.has(WorldDataKeys.IS_INITIALIZED.KEY) ? currentWorldData.get(WorldDataKeys.IS_INITIALIZED.KEY, PersistentDataType.BOOLEAN) : false;
 
