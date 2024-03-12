@@ -2,6 +2,7 @@ package dev.potato.xpworldborder.listeners;
 
 import dev.potato.xpworldborder.XPWorldBorder;
 import dev.potato.xpworldborder.configurations.LevelConfig;
+import dev.potato.xpworldborder.models.Quadrant;
 import dev.potato.xpworldborder.utilities.LangUtilities;
 import dev.potato.xpworldborder.utilities.WorldBorderUtilities;
 import dev.potato.xpworldborder.utilities.enumerations.PersistentDataContainerKeys;
@@ -48,43 +49,38 @@ public class PlayerXPListeners implements Listener {
     }
 
     private void handlePlayerOutsideBorder(Player player) {
-        World playerWorld = player.getWorld();
-        Location playerLocation = player.getLocation();
-        WorldBorder playerWorldBorder = playerWorld.getWorldBorder();
-        Location worldBorderCenter = playerWorldBorder.getCenter();
+        World world = player.getWorld();
+        Location location = player.getLocation();
+        WorldBorder worldBorder = world.getWorldBorder();
+        Location worldBorderCenter = worldBorder.getCenter();
 
-        if (isLocationOutsideBorder(playerLocation)) {
-            PersistentDataContainer playerData = player.getPersistentDataContainer();
-            if (playerData.has(PersistentDataContainerKeys.SHOULD_KILL_ON_JOIN.KEY)) {
-                boolean shouldKill = playerData.get(PersistentDataContainerKeys.SHOULD_KILL_ON_JOIN.KEY, PersistentDataType.BOOLEAN);
-                if (shouldKill) {
-                    player.setHealth(0);
-                    player.sendMessage(LangUtilities.PLUGIN_PREFIX.append(Component.text(" ").append(LangUtilities.LEFT_WHILE_OUTSIDE_BORDER)));
-                    playerData.set(PersistentDataContainerKeys.SHOULD_KILL_ON_JOIN.KEY, PersistentDataType.BOOLEAN, false);
-                    return;
-                }
-            }
+        if (!isLocationOutsideBorder(location)) return;
 
-            Location closestBorderLocation = null;
-            for (int i = 0; i < 500; i++) {
-                Location currentLocation = null;
-                if (playerLocation.getX() >= worldBorderCenter.getX() && playerLocation.getZ() >= worldBorderCenter.getZ()) {
-                    currentLocation = playerLocation.subtract(i, 0, i);
-                } else if (playerLocation.getX() > worldBorderCenter.getX() && playerLocation.getZ() < worldBorderCenter.getZ()) {
-                    currentLocation = playerLocation.subtract(i, 0, 0).add(0, 0, i);
-                } else if (playerLocation.getX() < worldBorderCenter.getX() && playerLocation.getZ() < worldBorderCenter.getZ()) {
-                    currentLocation = playerLocation.add(i, 0, i);
-                } else if (playerLocation.getX() < worldBorderCenter.getX() && playerLocation.getZ() > worldBorderCenter.getZ()) {
-                    currentLocation = playerLocation.add(i, 0, 0).subtract(0, 0, i);
-                }
-                if (!isLocationOutsideBorder(currentLocation)) {
-                    closestBorderLocation = currentLocation;
-                    break;
-                }
+        PersistentDataContainer playerData = player.getPersistentDataContainer();
+        if (playerData.has(PersistentDataContainerKeys.SHOULD_KILL_ON_JOIN.KEY)) {
+            boolean shouldKill = playerData.get(PersistentDataContainerKeys.SHOULD_KILL_ON_JOIN.KEY, PersistentDataType.BOOLEAN);
+            if (shouldKill) {
+                player.setHealth(0);
+                player.sendMessage(LangUtilities.PLUGIN_PREFIX.append(Component.text(" ").append(LangUtilities.LEFT_WHILE_OUTSIDE_BORDER)));
+                playerData.set(PersistentDataContainerKeys.SHOULD_KILL_ON_JOIN.KEY, PersistentDataType.BOOLEAN, false);
+                return;
             }
-            player.teleport(playerWorld.getHighestBlockAt(closestBorderLocation).getLocation().add(0, 2, 0));
-            player.sendMessage(LangUtilities.PLUGIN_PREFIX.append(Component.text(" ").append(LangUtilities.LEFT_AND_BORDER_SHRUNK)));
         }
+
+        Quadrant playerQuadrant = Quadrant.getQuadrant(location, worldBorderCenter);
+        Location closestSafeLocation = location;
+        for (int i = 0; i < playerQuadrant.getDiagonalDistance(); i++) {
+            closestSafeLocation = switch (playerQuadrant.getQuadrantType()) {
+                case POS_POS -> location.subtract(i, 0, i);
+                case POS_NEG -> location.subtract(i, 0, 0).add(0, 0, i);
+                case NEG_NEG -> location.add(i, 0, i);
+                case NEG_POS -> location.add(i, 0, 0).subtract(0, 0, i);
+                default -> location;
+            };
+            if (!isLocationOutsideBorder(closestSafeLocation)) break;
+        }
+        player.teleport(Quadrant.getHighestPoint(closestSafeLocation).add(1, 0, 1));
+        player.sendMessage(LangUtilities.PLUGIN_PREFIX.append(Component.text(" ").append(LangUtilities.LEFT_AND_BORDER_SHRUNK)));
     }
 
     private boolean isLocationOutsideBorder(Location location) {
