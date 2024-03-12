@@ -49,9 +49,11 @@ public class PlayerXPListeners implements Listener {
 
     private void handlePlayerOutsideBorder(Player player) {
         World playerWorld = player.getWorld();
+        Location playerLocation = player.getLocation();
         WorldBorder playerWorldBorder = playerWorld.getWorldBorder();
+        Location worldBorderCenter = playerWorldBorder.getCenter();
 
-        if (isPlayerOutsideBorder(player)) {
+        if (isLocationOutsideBorder(playerLocation)) {
             PersistentDataContainer playerData = player.getPersistentDataContainer();
             if (playerData.has(PersistentDataContainerKeys.SHOULD_KILL_ON_JOIN.KEY)) {
                 boolean shouldKill = playerData.get(PersistentDataContainerKeys.SHOULD_KILL_ON_JOIN.KEY, PersistentDataType.BOOLEAN);
@@ -62,28 +64,44 @@ public class PlayerXPListeners implements Listener {
                     return;
                 }
             }
-            Location borderCenter = playerWorldBorder.getCenter();
-            Block highestBlock = playerWorld.getHighestBlockAt(borderCenter);
-            player.teleport(highestBlock.getLocation());
+
+            Location closestBorderLocation = null;
+            for (int i = 0; i < 500; i++) {
+                Location currentLocation = null;
+                if (playerLocation.getX() >= worldBorderCenter.getX() && playerLocation.getZ() >= worldBorderCenter.getZ()) {
+                    currentLocation = playerLocation.subtract(i, 0, i);
+                } else if (playerLocation.getX() > worldBorderCenter.getX() && playerLocation.getZ() < worldBorderCenter.getZ()) {
+                    currentLocation = playerLocation.subtract(i, 0, 0).add(0, 0, i);
+                } else if (playerLocation.getX() < worldBorderCenter.getX() && playerLocation.getZ() < worldBorderCenter.getZ()) {
+                    currentLocation = playerLocation.add(i, 0, i);
+                } else if (playerLocation.getX() < worldBorderCenter.getX() && playerLocation.getZ() > worldBorderCenter.getZ()) {
+                    currentLocation = playerLocation.add(i, 0, 0).subtract(0, 0, i);
+                }
+                if (!isLocationOutsideBorder(currentLocation)) {
+                    closestBorderLocation = currentLocation;
+                    break;
+                }
+            }
+            player.teleport(playerWorld.getHighestBlockAt(closestBorderLocation).getLocation().add(0, 2, 0));
             player.sendMessage(LangUtilities.PLUGIN_PREFIX.append(Component.text(" ").append(LangUtilities.LEFT_AND_BORDER_SHRUNK)));
         }
     }
 
-    private boolean isPlayerOutsideBorder(Player player) {
-        Location playerLocation = player.getLocation();
-        WorldBorder worldBorder = player.getWorld().getWorldBorder();
+    private boolean isLocationOutsideBorder(Location location) {
+        World world = location.getWorld();
+        WorldBorder worldBorder = world.getWorldBorder();
         Location worldBorderCenter = worldBorder.getCenter();
-        double radius = worldBorder.getSize() / 2;
-        double x = playerLocation.getX() - worldBorderCenter.getX();
-        double z = playerLocation.getZ() - worldBorderCenter.getZ();
-        return ((x > radius || (-x) > radius) || (z > radius || (-z) > radius));
+        double radius = (worldBorder.getSize() / 2) + 1;
+        double distanceX = location.getX() - worldBorderCenter.getX();
+        double distanceZ = location.getZ() - worldBorderCenter.getZ();
+        return ((distanceX > radius || -distanceX > radius) || (distanceZ > radius || -distanceZ > radius));
     }
 
     @EventHandler
     public void onPlayerLeave(PlayerQuitEvent e) {
         Player player = e.getPlayer();
 
-        if (isPlayerOutsideBorder(player)) {
+        if (isLocationOutsideBorder(player.getLocation())) {
             PersistentDataContainer playerData = player.getPersistentDataContainer();
             playerData.set(PersistentDataContainerKeys.SHOULD_KILL_ON_JOIN.KEY, PersistentDataType.BOOLEAN, true);
         }

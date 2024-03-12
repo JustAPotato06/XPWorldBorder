@@ -6,6 +6,8 @@ import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
+import java.util.concurrent.TimeUnit;
+
 public class WorldBordersUpdateTask extends BukkitRunnable {
     private final double currentTotalLevels;
 
@@ -28,10 +30,10 @@ public class WorldBordersUpdateTask extends BukkitRunnable {
             }
 
             if (currentTotalLevels > currentSize) {
-                worldBorder.setSize(currentSize + 1, 1);
+                worldBorder.setSize(currentSize + 1, TimeUnit.MILLISECONDS, 500);
                 isIncrease = true;
             } else {
-                worldBorder.setSize(currentSize - 1, 1);
+                worldBorder.setSize(currentSize - 1, TimeUnit.MILLISECONDS, 500);
                 isDecrease = true;
             }
         }

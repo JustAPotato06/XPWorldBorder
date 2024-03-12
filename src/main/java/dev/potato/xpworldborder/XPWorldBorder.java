@@ -79,7 +79,7 @@ public final class XPWorldBorder extends JavaPlugin {
 
         langConfig.addDefault(LangConfigKeys.PLUGIN_PREFIX.KEY, "&2&l[XP World Border]&r");
         langConfig.addDefault(LangConfigKeys.LEFT_WHILE_OUTSIDE_BORDER.KEY, "&cYou left while outside the world border! You have been killed and sent back to spawn.");
-        langConfig.addDefault(LangConfigKeys.LEFT_AND_BORDER_SHRUNK.KEY, "&aThe world border shrunk while you were gone! You've been teleported to the world's center.");
+        langConfig.addDefault(LangConfigKeys.LEFT_AND_BORDER_SHRUNK.KEY, "&aThe world border shrunk while you were gone! You've been teleported inside the border.");
         langConfig.addDefault(LangConfigKeys.ALL_SOUNDS_ENABLED.KEY, "&aAll world border sounds have now been enabled!");
         langConfig.addDefault(LangConfigKeys.ALL_SOUNDS_DISABLED.KEY, "&cAll world border sounds have now been disabled!");
         langConfig.addDefault(LangConfigKeys.INCREASE_SOUNDS_ENABLED.KEY, "&aWorld border increase sounds have now been enabled!");

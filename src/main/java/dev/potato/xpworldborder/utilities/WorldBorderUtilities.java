@@ -38,7 +38,7 @@ public class WorldBorderUtilities {
         if (currentTotalLevels < 1) currentTotalLevels = 1;
         if (currentUpdateTask != null) currentUpdateTask.cancel();
         currentUpdateTask = new WorldBordersUpdateTask(currentTotalLevels);
-        currentUpdateTask.runTaskTimer(plugin, 0, 20);
+        currentUpdateTask.runTaskTimer(plugin, 0, 10);
     }
 
     public void givePlayerScoreboard(Player player) {
