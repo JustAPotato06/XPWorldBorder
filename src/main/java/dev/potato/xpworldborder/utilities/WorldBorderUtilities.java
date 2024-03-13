@@ -7,10 +7,8 @@ import dev.potato.xpworldborder.tasks.WorldBordersUpdateTask;
 import dev.potato.xpworldborder.utilities.enumerations.configurations.ConfigKeys;
 import dev.potato.xpworldborder.utilities.enumerations.configurations.LevelConfigKeys;
 import net.kyori.adventure.text.Component;
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.World;
-import org.bukkit.WorldBorder;
+import org.bukkit.*;
+import org.bukkit.block.Block;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.*;
@@ -62,7 +60,11 @@ public class WorldBorderUtilities {
         double radius = (worldBorder.getSize() / 2) + 1;
         double distanceX = location.getX() - worldBorderCenter.getX();
         double distanceZ = location.getZ() - worldBorderCenter.getZ();
-        return ((distanceX > radius || -distanceX > radius) || (distanceZ > radius || -distanceZ > radius));
+        return Math.abs(distanceX) > radius || Math.abs(distanceZ) > radius;
+    }
+
+    public boolean isHighestLocationSafe(Location location) {
+        return getHighestLocationNoNetherRoof(location).getBlock().isSolid();
     }
 
     public void tpPlayerToNearestInBorderBlock(Player player) {
@@ -74,9 +76,11 @@ public class WorldBorderUtilities {
             closestBorderLocation = getNextLocation(i, playerQuadrant, location);
             if (!isLocationOutsideBorder(closestBorderLocation)) break;
         }
-        Location finalLocation = closestBorderLocation.toHighestLocation().add(0, 1, 0);
+        Location finalLocation = getHighestLocationNoNetherRoof(closestBorderLocation).add(0, 1, 0);
+        if (isLocationOutsideBorder(finalLocation))
+            finalLocation = getHighestLocationNoNetherRoof(worldBorderCenter).add(0, 1, 0);
         player.teleport(finalLocation);
-        if (!isLocationSafe(finalLocation)) tpPlayerToNearestSafeLocation(player);
+        if (!isHighestLocationSafe(finalLocation)) tpPlayerToNearestSafeLocation(player);
     }
 
     public void tpPlayerToNearestSafeLocation(Player player) {
@@ -86,10 +90,12 @@ public class WorldBorderUtilities {
         Location closestSafeLocation = location;
         for (int i = 0; i < playerQuadrant.getDiagonalDistance(); i++) {
             closestSafeLocation = getNextLocation(i, playerQuadrant, location);
-            if (isLocationSafe(closestSafeLocation)) break;
+            if (isHighestLocationSafe(closestSafeLocation)) break;
         }
-        Location finalLocation = closestSafeLocation.toHighestLocation().add(0, 1, 0);
-        player.teleport(closestSafeLocation);
+        Location finalLocation = getHighestLocationNoNetherRoof(closestSafeLocation).add(0, 1, 0);
+        if (isLocationOutsideBorder(finalLocation))
+            finalLocation = getHighestLocationNoNetherRoof(worldBorderCenter).add(0, 1, 0);
+        player.teleport(finalLocation);
     }
 
     private Location getNextLocation(int i, Quadrant playerQuadrant, Location location) {
@@ -102,7 +108,19 @@ public class WorldBorderUtilities {
         };
     }
 
-    public boolean isLocationSafe(Location location) {
-        return location.toHighestLocation().getBlock().isSolid();
+    public Location getHighestLocationNoNetherRoof(Location location) {
+        if (location.toHighestLocation().getBlock().getType() != Material.BEDROCK) return location.toHighestLocation();
+        Block highestBlock = location.getBlock();
+        for (int i = 129; i > 0; i--) {
+            Block currentBlock = new Location(location.getWorld(), location.getX(), i, location.getZ()).getBlock();
+            boolean isBlockSolid = currentBlock.isSolid();
+            boolean isAirAbove = currentBlock.getLocation().add(0, 1, 0).getBlock().getType() == Material.AIR && currentBlock.getLocation().add(0, 2, 0).getBlock().getType() == Material.AIR;
+            boolean isInRange = currentBlock.getLocation().getY() <= 75;
+            if (isBlockSolid && isAirAbove && isInRange) {
+                highestBlock = currentBlock;
+                break;
+            }
+        }
+        return highestBlock.getLocation();
     }
 }

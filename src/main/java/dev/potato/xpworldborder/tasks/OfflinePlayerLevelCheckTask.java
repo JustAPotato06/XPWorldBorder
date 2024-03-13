@@ -10,6 +10,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
 public class OfflinePlayerLevelCheckTask extends BukkitRunnable {
@@ -25,21 +26,31 @@ public class OfflinePlayerLevelCheckTask extends BukkitRunnable {
             long timeLastLeft = levelConfig.getLong(uuid + "." + LevelConfigKeys.TIME_LAST_LEFT.KEY);
             int currentLevel = levelConfig.getInt(uuid + "." + LevelConfigKeys.LEVEL_AMOUNT.KEY);
             String username = levelConfig.getString(uuid + "." + LevelConfigKeys.USERNAME.KEY);
-
             long secondsBeforeWipe = config.getLong(ConfigKeys.TIME_BEFORE_WIPE.KEY);
             long millisecondsBeforeWipe = secondsBeforeWipe * 1000;
+
             if (System.currentTimeMillis() - timeLastLeft >= millisecondsBeforeWipe) {
                 boolean wipeOldLevelData = plugin.getConfig().getBoolean(ConfigKeys.WIPE_OLD_LEVEL_DATA.KEY);
+                boolean isOffline;
 
-                if (wipeOldLevelData && currentLevel != 0) {
+                if (username == null) {
+                    isOffline = false;
+                } else {
+                    Player player = Bukkit.getPlayer(username);
+                    isOffline = player == null || !player.isOnline();
+                }
+
+                if (wipeOldLevelData && isOffline && currentLevel != 0) {
                     boolean shouldNotifyPlayersOnWipe = config.getBoolean(ConfigKeys.SHOULD_NOTIFY_PLAYERS_ON_WIPE.KEY);
+
                     if (shouldNotifyPlayersOnWipe) {
                         String timeDisplay = getTimeDisplay(secondsBeforeWipe);
                         Bukkit.broadcast(LangUtilities.PLUGIN_PREFIX
-                                .append(Component.text(username, NamedTextColor.GOLD)
+                                .append(Component.text(" " + username, NamedTextColor.GOLD)
                                         .append(Component.text(" has been offline for more than ", NamedTextColor.RED)
                                                 .append(Component.text(timeDisplay, NamedTextColor.GOLD))
-                                                .append(Component.text(" Their levels have been subtracted from all world borders.", NamedTextColor.RED)))
+                                                .append(Component.text(" " + currentLevel, NamedTextColor.GOLD))
+                                                .append(Component.text(" level(s) have been subtracted from all world borders.", NamedTextColor.RED)))
                                 ));
                     }
                     levelConfig.set(uuid + "." + LevelConfigKeys.LEVEL_AMOUNT.KEY, 0);
