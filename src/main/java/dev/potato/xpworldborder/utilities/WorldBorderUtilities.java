@@ -37,7 +37,7 @@ public class WorldBorderUtilities {
                 if (currentPlayer == null || !currentPlayer.isOnline()) currentTotalLevels += currentLevel;
             });
         }
-        if (currentTotalLevels < 1) currentTotalLevels = 1;
+        if (currentTotalLevels <= 1) currentTotalLevels = 2;
         if (currentUpdateTask != null) currentUpdateTask.cancel();
         currentUpdateTask = new WorldBordersUpdateTask(currentTotalLevels);
         currentUpdateTask.runTaskTimer(plugin, 0, 10);
@@ -53,74 +53,52 @@ public class WorldBorderUtilities {
         player.setScoreboard(scoreboard);
     }
 
-    public boolean isLocationOutsideBorder(Location location) {
+    public boolean isLocationInsideBorder(Location location) {
         World world = location.getWorld();
         WorldBorder worldBorder = world.getWorldBorder();
         Location worldBorderCenter = worldBorder.getCenter();
-        double radius = (worldBorder.getSize() / 2) + 1;
+        double radius = worldBorder.getSize() / 2;
         double distanceX = location.getX() - worldBorderCenter.getX();
         double distanceZ = location.getZ() - worldBorderCenter.getZ();
-        return Math.abs(distanceX) > radius || Math.abs(distanceZ) > radius;
+        return Math.abs(distanceX) < radius && Math.abs(distanceZ) < radius;
     }
 
     public boolean isHighestLocationSafe(Location location) {
-        return getHighestLocationNoNetherRoof(location).getBlock().isSolid();
+        Block block = toHighestLocationNoNetherRoof(location).getBlock();
+        return block.isSolid() &&
+                block.getType() != Material.MAGMA_BLOCK &&
+                block.getLocation().add(0, 1, 0).getBlock().getType() != Material.LAVA &&
+                block.getLocation().add(0, 1, 0).getBlock().getType() != Material.WATER;
     }
 
-    public void tpPlayerToNearestInBorderBlock(Player player) {
+    public Location toHighestLocationNoNetherRoof(Location location) {
+        if (location.getWorld().getEnvironment() != World.Environment.NETHER) return location.toHighestLocation();
+        for (int i = 75; i >= 0; i--) {
+            location.setY(i);
+            if (location.getBlock().isSolid()) break;
+        }
+        return location;
+    }
+
+    public void tpPlayerToNearestBlockInBorder(Player player) {
         Location location = player.getLocation();
+        if (isLocationInsideBorder(location)) return;
         Location worldBorderCenter = player.getWorld().getWorldBorder().getCenter();
         Quadrant playerQuadrant = Quadrant.getQuadrant(location, worldBorderCenter);
-        Location closestBorderLocation = location;
-        for (int i = 0; i < playerQuadrant.getDiagonalDistance(); i++) {
-            closestBorderLocation = getNextLocation(i, playerQuadrant, location);
-            if (!isLocationOutsideBorder(closestBorderLocation)) break;
+        int distanceToCenter = (int) Math.round(playerQuadrant.getDiagonalDistance());
+        for (int i = 0; i < distanceToCenter; i++) {
+            location = switch (playerQuadrant.quadrantType()) {
+                case POS_POS -> location.subtract(1, 0, 1);
+                case POS_NEG -> location.subtract(1, 0, 0).add(0, 0, 1);
+                case NEG_NEG -> location.add(1, 0, 1);
+                case NEG_POS -> location.add(1, 0, 0).subtract(0, 0, 1);
+                default -> location;
+            };
+            if (isLocationInsideBorder(location) && isHighestLocationSafe(location)) break;
         }
-        Location finalLocation = getHighestLocationNoNetherRoof(closestBorderLocation).add(0, 1, 0);
-        if (isLocationOutsideBorder(finalLocation))
-            finalLocation = getHighestLocationNoNetherRoof(worldBorderCenter).add(0, 1, 0);
-        player.teleport(finalLocation);
-        if (!isHighestLocationSafe(finalLocation)) tpPlayerToNearestSafeLocation(player);
-    }
-
-    public void tpPlayerToNearestSafeLocation(Player player) {
-        Location location = player.getLocation();
-        Location worldBorderCenter = player.getWorld().getWorldBorder().getCenter();
-        Quadrant playerQuadrant = Quadrant.getQuadrant(location, worldBorderCenter);
-        Location closestSafeLocation = location;
-        for (int i = 0; i < playerQuadrant.getDiagonalDistance(); i++) {
-            closestSafeLocation = getNextLocation(i, playerQuadrant, location);
-            if (isHighestLocationSafe(closestSafeLocation)) break;
-        }
-        Location finalLocation = getHighestLocationNoNetherRoof(closestSafeLocation).add(0, 1, 0);
-        if (isLocationOutsideBorder(finalLocation))
-            finalLocation = getHighestLocationNoNetherRoof(worldBorderCenter).add(0, 1, 0);
-        player.teleport(finalLocation);
-    }
-
-    private Location getNextLocation(int i, Quadrant playerQuadrant, Location location) {
-        return switch (playerQuadrant.getQuadrantType()) {
-            case POS_POS -> location.subtract(i, 0, i);
-            case POS_NEG -> location.subtract(i, 0, 0).add(0, 0, i);
-            case NEG_NEG -> location.add(i, 0, i);
-            case NEG_POS -> location.add(i, 0, 0).subtract(0, 0, i);
-            default -> location;
-        };
-    }
-
-    public Location getHighestLocationNoNetherRoof(Location location) {
-        if (location.toHighestLocation().getBlock().getType() != Material.BEDROCK) return location.toHighestLocation();
-        Block highestBlock = location.getBlock();
-        for (int i = 129; i > 0; i--) {
-            Block currentBlock = new Location(location.getWorld(), location.getX(), i, location.getZ()).getBlock();
-            boolean isBlockSolid = currentBlock.isSolid();
-            boolean isAirAbove = currentBlock.getLocation().add(0, 1, 0).getBlock().getType() == Material.AIR && currentBlock.getLocation().add(0, 2, 0).getBlock().getType() == Material.AIR;
-            boolean isInRange = currentBlock.getLocation().getY() <= 75;
-            if (isBlockSolid && isAirAbove && isInRange) {
-                highestBlock = currentBlock;
-                break;
-            }
-        }
-        return highestBlock.getLocation();
+        Location destination = toHighestLocationNoNetherRoof(location).add(0, 1, 0);
+        if (!isLocationInsideBorder(destination))
+            destination = toHighestLocationNoNetherRoof(worldBorderCenter).add(0, 1, 0);
+        player.teleport(destination);
     }
 }

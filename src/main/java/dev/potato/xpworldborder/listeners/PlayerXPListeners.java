@@ -10,9 +10,9 @@ import dev.potato.xpworldborder.utilities.enumerations.configurations.ConfigKeys
 import dev.potato.xpworldborder.utilities.enumerations.configurations.LevelConfigKeys;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.WorldBorder;
-import org.bukkit.block.Block;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
@@ -48,9 +48,10 @@ public class PlayerXPListeners implements Listener {
     }
 
     private void handlePlayerOutsideBorder(Player player) {
-        if (!worldBorderManager.isLocationOutsideBorder(player.getLocation())) return;
+        if (worldBorderManager.isLocationInsideBorder(player.getLocation())) return;
 
         PersistentDataContainer playerData = player.getPersistentDataContainer();
+
         if (playerData.has(PersistentDataContainerKeys.SHOULD_KILL_ON_JOIN.KEY)) {
             boolean shouldKill = playerData.get(PersistentDataContainerKeys.SHOULD_KILL_ON_JOIN.KEY, PersistentDataType.BOOLEAN);
             if (shouldKill) {
@@ -61,7 +62,7 @@ public class PlayerXPListeners implements Listener {
             }
         }
 
-        worldBorderManager.tpPlayerToNearestInBorderBlock(player);
+        worldBorderManager.tpPlayerToNearestBlockInBorder(player);
         player.sendMessage(LangUtilities.PLUGIN_PREFIX.append(Component.text(" ").append(LangUtilities.LEFT_AND_BORDER_SHRUNK)));
     }
 
@@ -69,7 +70,7 @@ public class PlayerXPListeners implements Listener {
     public void onPlayerLeave(PlayerQuitEvent e) {
         Player player = e.getPlayer();
 
-        if (worldBorderManager.isLocationOutsideBorder(player.getLocation())) {
+        if (!worldBorderManager.isLocationInsideBorder(player.getLocation())) {
             PersistentDataContainer playerData = player.getPersistentDataContainer();
             playerData.set(PersistentDataContainerKeys.SHOULD_KILL_ON_JOIN.KEY, PersistentDataType.BOOLEAN, true);
         }
@@ -104,10 +105,7 @@ public class PlayerXPListeners implements Listener {
     public void onPlayerDeath(PlayerDeathEvent e) {
         boolean shouldChangeDeathMessage = plugin.getConfig().getBoolean(ConfigKeys.SHOULD_CHANGE_DEATH_MESSAGE.KEY);
         if (!shouldChangeDeathMessage) return;
-        Component deathMessage = e.deathMessage()
-                .append(Component.text(". They had ")
-                        .append(Component.text(e.getPlayer().getLevel(), NamedTextColor.GREEN)
-                                .append(Component.text(" levels.", NamedTextColor.WHITE))));
+        Component deathMessage = e.deathMessage().append(Component.text(". They had ").append(Component.text(e.getPlayer().getLevel(), NamedTextColor.GREEN).append(Component.text(" levels.", NamedTextColor.WHITE))));
         e.deathMessage(deathMessage);
     }
 
@@ -117,8 +115,8 @@ public class PlayerXPListeners implements Listener {
             @Override
             public void run() {
                 Player player = e.getPlayer();
-                Block highestBlock = player.getWorld().getHighestBlockAt(player.getLocation());
-                player.teleport(highestBlock.getLocation().add(0, 1, 0));
+                Location highestLocation = worldBorderManager.toHighestLocationNoNetherRoof(player.getLocation());
+                player.teleport(highestLocation.add(0, 1, 0));
             }
         }.runTaskLater(plugin, 10);
     }
@@ -126,13 +124,14 @@ public class PlayerXPListeners implements Listener {
     @EventHandler
     public void onPlayerWorldChange(PlayerChangedWorldEvent e) {
         Player player = e.getPlayer();
-        WorldBorder previousWorldBorder = e.getFrom().getWorldBorder();
         World currentWorld = player.getWorld();
-        WorldBorder currentWorldBorder = currentWorld.getWorldBorder();
         PersistentDataContainer currentWorldData = currentWorld.getPersistentDataContainer();
         boolean isInitialized = currentWorldData.has(WorldDataKeys.IS_INITIALIZED.KEY) ? currentWorldData.get(WorldDataKeys.IS_INITIALIZED.KEY, PersistentDataType.BOOLEAN) : false;
 
         if (!isInitialized) {
+            WorldBorder currentWorldBorder = currentWorld.getWorldBorder();
+            WorldBorder previousWorldBorder = e.getFrom().getWorldBorder();
+
             currentWorldBorder.setSize(previousWorldBorder.getSize());
             currentWorldBorder.setCenter(player.getLocation());
             currentWorldData.set(WorldDataKeys.IS_INITIALIZED.KEY, PersistentDataType.BOOLEAN, true);
