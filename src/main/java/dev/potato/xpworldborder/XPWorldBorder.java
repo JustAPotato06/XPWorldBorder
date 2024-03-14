@@ -21,6 +21,11 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.io.File;
 import java.util.ArrayList;
 
+/*
+TODO - Player glow
+TODO - Player glow color
+*/
+
 public final class XPWorldBorder extends JavaPlugin {
     private static XPWorldBorder plugin;
 
@@ -55,7 +60,7 @@ public final class XPWorldBorder extends JavaPlugin {
         // Setup.yml
         SetupConfig.setup(dataFolder);
         FileConfiguration setupConfig = SetupConfig.getConfig();
-        setupConfig.addDefault(SetupConfigKeys.SHOULD_INITIALIZE.KEY, true);
+        setupConfig.addDefault(SetupConfigKeys.SHOULD_INITIALIZE_WORLDS.KEY, true);
         setupConfig.options().copyDefaults(true);
         SetupConfig.save();
 
@@ -64,6 +69,7 @@ public final class XPWorldBorder extends JavaPlugin {
         FileConfiguration soundConfig = SoundConfig.getConfig();
         soundConfig.addDefault(SoundConfigKeys.NO_SOUND_INCREASE.KEY, new ArrayList<>());
         soundConfig.addDefault(SoundConfigKeys.NO_SOUND_DECREASE.KEY, new ArrayList<>());
+        soundConfig.addDefault(SoundConfigKeys.NO_SOUND_OUTSIDE_BORDER.KEY, new ArrayList<>());
         soundConfig.options().copyDefaults(true);
         SoundConfig.save();
 
@@ -76,7 +82,12 @@ public final class XPWorldBorder extends JavaPlugin {
         // Lang.yml
         LangConfig.setup(dataFolder);
         FileConfiguration langConfig = LangConfig.getConfig();
+        addLangDefaults(langConfig);
+        langConfig.options().copyDefaults(true);
+        LangConfig.save();
+    }
 
+    private void addLangDefaults(FileConfiguration langConfig) {
         langConfig.addDefault(LangConfigKeys.PLUGIN_PREFIX.KEY, "&2&l[XP World Border]&r");
         langConfig.addDefault(LangConfigKeys.LEFT_WHILE_OUTSIDE_BORDER.KEY, "&cYou left while outside the world border! You have been killed and sent back to spawn.");
         langConfig.addDefault(LangConfigKeys.LEFT_AND_BORDER_SHRUNK.KEY, "&aThe world border shrunk while you were gone! You've been teleported inside the border.");
@@ -86,14 +97,13 @@ public final class XPWorldBorder extends JavaPlugin {
         langConfig.addDefault(LangConfigKeys.INCREASE_SOUNDS_DISABLED.KEY, "&cWorld border increase sounds have now been disabled!");
         langConfig.addDefault(LangConfigKeys.DECREASE_SOUNDS_ENABLED.KEY, "&aWorld border decrease sounds have now been enabled!");
         langConfig.addDefault(LangConfigKeys.DECREASE_SOUNDS_DISABLED.KEY, "&cWorld border decrease sounds have now been disabled!");
-
-        langConfig.options().copyDefaults(true);
-        LangConfig.save();
+        langConfig.addDefault(LangConfigKeys.OUTSIDE_BORDER_SOUNDS_ENABLED.KEY, "&aOutside world border tick sounds have now been enabled!");
+        langConfig.addDefault(LangConfigKeys.OUTSIDE_BORDER_SOUNDS_DISABLED.KEY, "&cOutside world border tick sounds have now been disabled!");
     }
 
     private void initializeWorlds() {
         FileConfiguration config = SetupConfig.getConfig();
-        boolean shouldInitialize = config.getBoolean(SetupConfigKeys.SHOULD_INITIALIZE.KEY);
+        boolean shouldInitialize = config.getBoolean(SetupConfigKeys.SHOULD_INITIALIZE_WORLDS.KEY);
         if (!shouldInitialize) return;
         for (World world : Bukkit.getWorlds()) {
             world.setGameRule(GameRule.SPAWN_RADIUS, 1);
@@ -101,7 +111,7 @@ public final class XPWorldBorder extends JavaPlugin {
             WorldBorder worldBorder = world.getWorldBorder();
             worldBorder.setCenter(world.getSpawnLocation());
             worldBorder.setSize(5);
-            config.set(SetupConfigKeys.SHOULD_INITIALIZE.KEY, false);
+            config.set(SetupConfigKeys.SHOULD_INITIALIZE_WORLDS.KEY, false);
             SetupConfig.save();
         }
     }

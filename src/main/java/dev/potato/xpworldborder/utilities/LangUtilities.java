@@ -17,4 +17,6 @@ public class LangUtilities {
     public static final TextComponent INCREASE_SOUNDS_DISABLED = LegacyComponentSerializer.legacy('&').deserialize(langConfig.getString(LangConfigKeys.INCREASE_SOUNDS_DISABLED.KEY));
     public static final TextComponent DECREASE_SOUNDS_ENABLED = LegacyComponentSerializer.legacy('&').deserialize(langConfig.getString(LangConfigKeys.DECREASE_SOUNDS_ENABLED.KEY));
     public static final TextComponent DECREASE_SOUNDS_DISABLED = LegacyComponentSerializer.legacy('&').deserialize(langConfig.getString(LangConfigKeys.DECREASE_SOUNDS_DISABLED.KEY));
+    public static final TextComponent OUTSIDE_BORDER_SOUNDS_ENABLED = LegacyComponentSerializer.legacy('&').deserialize(langConfig.getString(LangConfigKeys.OUTSIDE_BORDER_SOUNDS_ENABLED.KEY));
+    public static final TextComponent OUTSIDE_BORDER_SOUNDS_DISABLED = LegacyComponentSerializer.legacy('&').deserialize(langConfig.getString(LangConfigKeys.OUTSIDE_BORDER_SOUNDS_DISABLED.KEY));
 }

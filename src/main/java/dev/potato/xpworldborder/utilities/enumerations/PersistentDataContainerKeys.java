@@ -4,7 +4,8 @@ import dev.potato.xpworldborder.XPWorldBorder;
 import org.bukkit.NamespacedKey;
 
 public enum PersistentDataContainerKeys {
-    SHOULD_KILL_ON_JOIN(new NamespacedKey(XPWorldBorder.getPlugin(), "should-kill-on-join"));
+    KILL_ON_JOIN(new NamespacedKey(XPWorldBorder.getPlugin(), "kill-on-join")),
+    IS_WORLD_INITIALIZED(new NamespacedKey(XPWorldBorder.getPlugin(), "is-world-initialized"));
 
     public final NamespacedKey KEY;
 

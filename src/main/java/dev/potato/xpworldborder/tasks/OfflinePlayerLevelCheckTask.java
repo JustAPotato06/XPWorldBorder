@@ -16,12 +16,11 @@ import org.bukkit.scheduler.BukkitRunnable;
 public class OfflinePlayerLevelCheckTask extends BukkitRunnable {
     private final XPWorldBorder plugin = XPWorldBorder.getPlugin();
     private final WorldBorderUtilities worldBorderManager = WorldBorderUtilities.getManager();
+    private final FileConfiguration config = plugin.getConfig();
+    private final FileConfiguration levelConfig = LevelConfig.getConfig();
 
     @Override
     public void run() {
-        FileConfiguration levelConfig = LevelConfig.getConfig();
-        FileConfiguration config = plugin.getConfig();
-
         levelConfig.getKeys(false).forEach(uuid -> {
             long timeLastLeft = levelConfig.getLong(uuid + "." + LevelConfigKeys.TIME_LAST_LEFT.KEY);
             int currentLevel = levelConfig.getInt(uuid + "." + LevelConfigKeys.LEVEL_AMOUNT.KEY);
@@ -41,7 +40,7 @@ public class OfflinePlayerLevelCheckTask extends BukkitRunnable {
                 }
 
                 if (wipeOldLevelData && isOffline && currentLevel != 0) {
-                    boolean shouldNotifyPlayersOnWipe = config.getBoolean(ConfigKeys.SHOULD_NOTIFY_PLAYERS_ON_WIPE.KEY);
+                    boolean shouldNotifyPlayersOnWipe = config.getBoolean(ConfigKeys.NOTIFY_PLAYERS_ON_WIPE.KEY);
 
                     if (shouldNotifyPlayersOnWipe) {
                         String timeDisplay = getTimeDisplay(secondsBeforeWipe);
@@ -49,8 +48,9 @@ public class OfflinePlayerLevelCheckTask extends BukkitRunnable {
                                 .append(Component.text(" " + username, NamedTextColor.GOLD)
                                         .append(Component.text(" has been offline for more than ", NamedTextColor.RED)
                                                 .append(Component.text(timeDisplay, NamedTextColor.GOLD))
-                                                .append(Component.text(" " + currentLevel, NamedTextColor.GOLD))
-                                                .append(Component.text(" level(s) have been subtracted from all world borders.", NamedTextColor.RED)))
+                                                .append(Component.text("!", NamedTextColor.RED))
+                                                .append(Component.text(" " + currentLevel + " level(s)", NamedTextColor.GOLD))
+                                                .append(Component.text(" have been subtracted from all world borders.", NamedTextColor.RED)))
                                 ));
                     }
                     levelConfig.set(uuid + "." + LevelConfigKeys.LEVEL_AMOUNT.KEY, 0);
@@ -63,15 +63,10 @@ public class OfflinePlayerLevelCheckTask extends BukkitRunnable {
 
     private String getTimeDisplay(Long seconds) {
         String timeDisplay;
-        if (seconds < 60) {
-            timeDisplay = seconds + " second(s)!";
-        } else if (seconds < 3600) {
-            timeDisplay = (seconds / 60) + " minute(s)!";
-        } else if (seconds < 86400) {
-            timeDisplay = (seconds / 3600) + " hour(s)!";
-        } else {
-            timeDisplay = (seconds / 86400) + " day(s)!";
-        }
+        if (seconds < 60) timeDisplay = seconds + " second(s)";
+        else if (seconds < 3600) timeDisplay = (seconds / 60) + " minute(s)";
+        else if (seconds < 86400) timeDisplay = (seconds / 3600) + " hour(s)";
+        else timeDisplay = (seconds / 86400) + " day(s)";
         return timeDisplay;
     }
 }

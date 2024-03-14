@@ -1,6 +1,45 @@
+###############################
+#                             #
+#          GAMEPLAY           #
+#                             #
+###############################
+
+# This is the time, in seconds, that the border will take to update once a player's level changes
+# The ratio for this value is the amount of seconds it takes to update PER EVERY BLOCK
+# The default is 0.2 (or 2/10 a second per block)
+# If set to 0, the world border will update instantly
+border-update-speed: 0.2
+
+# After a player leaves the border, a countdown will begin. Once it reaches 0, the player will die
+# This is how long the countdown should count down for in seconds
+# The default is 10 seconds (set to 0 to DISABLE the countdown)
+outside-border-countdown-time: 10
+
+# Given the countdown above isn't disabled, this will toggle whether a player will explode when the countdown reaches 0
+# Note: The explosion will not affect any blocks
+players-explode-on-border-death: true
+
+# If the option above is set to TRUE, this will determine how many particles will make up the player's explosion
+# The default is 200
+number-of-particles-on-explosion: 200
+
+# If enabled, when a player leaves while inside the border, and comes back after the border has shrunk,
+# they will be teleported to the closest location inside the border!
+# The algorithm this feature uses is consistently updating! Please report any bugs you may find to the developers
+teleport-players-inside-border: true
+
+# If enabled, when a player leaves while outside the border in an attempt to evade death, they will be killed upon server rejoin
+kill-players-outside-border-on-leave: true
+
+###############################
+#                             #
+#      LEVEL PERSISTENCE      #
+#                             #
+###############################
+
 # When this is enabled, when a player leaves, the border will shrink
 # The amount the border shrinks will depend on how many levels the player had
-# Otherwise, levels will be stored persistently
+# If false, levels will be stored persistently
 update-border-on-leave: false
 
 # This value only matters if you have the option above set to FALSE
@@ -13,11 +52,20 @@ wipe-old-level-data: true
 # The default is 172800 (2 days)
 time-before-wipe: 172800
 
-# If true, the plugin will broadcast a notifying message to all players when a player's level data is wiped
-should-notify-players-on-wipe: true
+###############################
+#                             #
+#       PLUGIN MESSAGES       #
+#                             #
+###############################
+
+# NOTE: If you're looking to change the messages that the plugin sends, you can do so in the lang.yml file!
+
+# If true, the plugin will broadcast a notifying message to all players when an offline player's level data is wiped and the border is updated
+notify-players-on-wipe: true
 
 # If true, the amount of levels the player had before they died will be displayed at the end of every death message
-should-change-death-message: true
+# In addition to this, custom death messages such as a death message for the player exploding when outside the border will also be added
+change-death-message: true
 
 # If true, all players will be able to see the amount of levels all other players have when holding tab and looking at the player list
-should-display-levels-in-tab: true
+display-levels-in-tab: true

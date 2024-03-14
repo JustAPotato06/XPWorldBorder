@@ -1,12 +1,18 @@
 package dev.potato.xpworldborder.utilities.enumerations.configurations;
 
 public enum ConfigKeys {
+    BORDER_UPDATE_SPEED("border-update-speed"),
+    OUTSIDE_BORDER_COUNTDOWN_TIME("outside-border-countdown-time"),
+    PLAYERS_EXPLODE_ON_BORDER_DEATH("players-explode-on-border-death"),
+    NUMBER_OF_PARTICLES_ON_EXPLOSION("number-of-particles-on-explosion"),
+    TELEPORT_PLAYERS_INSIDE_BORDER("teleport-players-inside-border"),
+    KILL_PLAYERS_OUTSIDE_BORDER_ON_LEAVE("kill-players-outside-border-on-leave"),
     UPDATE_BORDER_ON_LEAVE("update-border-on-leave"),
     WIPE_OLD_LEVEL_DATA("wipe-old-level-data"),
     TIME_BEFORE_WIPE("time-before-wipe"),
-    SHOULD_CHANGE_DEATH_MESSAGE("should-change-death-message"),
-    SHOULD_DISPLAY_LEVELS_IN_TAB("should-display-levels-in-tab"),
-    SHOULD_NOTIFY_PLAYERS_ON_WIPE("should-notify-players-on-wipe");
+    NOTIFY_PLAYERS_ON_WIPE("notify-players-on-wipe"),
+    CHANGE_DEATH_MESSAGE("change-death-message"),
+    DISPLAY_LEVELS_IN_TAB("display-levels-in-tab");
 
     public final String KEY;
 

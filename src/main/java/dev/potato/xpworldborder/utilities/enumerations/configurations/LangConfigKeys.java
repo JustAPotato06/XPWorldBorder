@@ -9,7 +9,9 @@ public enum LangConfigKeys {
     INCREASE_SOUNDS_ENABLED("increase-sounds-enabled"),
     INCREASE_SOUNDS_DISABLED("increase-sounds-disabled"),
     DECREASE_SOUNDS_ENABLED("decrease-sounds-enabled"),
-    DECREASE_SOUNDS_DISABLED("decrease-sounds-disabled");
+    DECREASE_SOUNDS_DISABLED("decrease-sounds-disabled"),
+    OUTSIDE_BORDER_SOUNDS_ENABLED("outside-border-sounds-enabled"),
+    OUTSIDE_BORDER_SOUNDS_DISABLED("outside-border-sounds-disabled");
 
     public final String KEY;
 

@@ -2,10 +2,10 @@ package dev.potato.xpworldborder.listeners;
 
 import dev.potato.xpworldborder.XPWorldBorder;
 import dev.potato.xpworldborder.configurations.LevelConfig;
+import dev.potato.xpworldborder.tasks.KillCountdownTask;
 import dev.potato.xpworldborder.utilities.LangUtilities;
 import dev.potato.xpworldborder.utilities.WorldBorderUtilities;
 import dev.potato.xpworldborder.utilities.enumerations.PersistentDataContainerKeys;
-import dev.potato.xpworldborder.utilities.enumerations.WorldDataKeys;
 import dev.potato.xpworldborder.utilities.enumerations.configurations.ConfigKeys;
 import dev.potato.xpworldborder.utilities.enumerations.configurations.LevelConfigKeys;
 import net.kyori.adventure.text.Component;
@@ -25,8 +25,9 @@ import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.scheduler.BukkitRunnable;
 
 public class PlayerXPListeners implements Listener {
-    private final WorldBorderUtilities worldBorderManager = WorldBorderUtilities.getManager();
     private final XPWorldBorder plugin = XPWorldBorder.getPlugin();
+    private final FileConfiguration config = plugin.getConfig();
+    private final WorldBorderUtilities worldBorderManager = WorldBorderUtilities.getManager();
 
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent e) {
@@ -40,7 +41,7 @@ public class PlayerXPListeners implements Listener {
 
         worldBorderManager.updateBorders();
 
-        boolean shouldDisplayLevelsInTab = plugin.getConfig().getBoolean(ConfigKeys.SHOULD_DISPLAY_LEVELS_IN_TAB.KEY);
+        boolean shouldDisplayLevelsInTab = config.getBoolean(ConfigKeys.DISPLAY_LEVELS_IN_TAB.KEY);
 
         if (shouldDisplayLevelsInTab) {
             worldBorderManager.givePlayerScoreboard(player);
@@ -50,20 +51,26 @@ public class PlayerXPListeners implements Listener {
     private void handlePlayerOutsideBorder(Player player) {
         if (worldBorderManager.isLocationInsideBorder(player.getLocation())) return;
 
-        PersistentDataContainer playerData = player.getPersistentDataContainer();
+        boolean killPlayersOutsideBorderOnLeave = config.getBoolean(ConfigKeys.KILL_PLAYERS_OUTSIDE_BORDER_ON_LEAVE.KEY);
+        if (killPlayersOutsideBorderOnLeave) {
+            PersistentDataContainer playerData = player.getPersistentDataContainer();
 
-        if (playerData.has(PersistentDataContainerKeys.SHOULD_KILL_ON_JOIN.KEY)) {
-            boolean shouldKill = playerData.get(PersistentDataContainerKeys.SHOULD_KILL_ON_JOIN.KEY, PersistentDataType.BOOLEAN);
-            if (shouldKill) {
-                player.setHealth(0);
-                player.sendMessage(LangUtilities.PLUGIN_PREFIX.append(Component.text(" ").append(LangUtilities.LEFT_WHILE_OUTSIDE_BORDER)));
-                playerData.set(PersistentDataContainerKeys.SHOULD_KILL_ON_JOIN.KEY, PersistentDataType.BOOLEAN, false);
-                return;
+            if (playerData.has(PersistentDataContainerKeys.KILL_ON_JOIN.KEY)) {
+                boolean shouldKill = playerData.get(PersistentDataContainerKeys.KILL_ON_JOIN.KEY, PersistentDataType.BOOLEAN);
+                if (shouldKill) {
+                    player.setHealth(0);
+                    player.sendMessage(LangUtilities.PLUGIN_PREFIX.append(Component.text(" ").append(LangUtilities.LEFT_WHILE_OUTSIDE_BORDER)));
+                    playerData.set(PersistentDataContainerKeys.KILL_ON_JOIN.KEY, PersistentDataType.BOOLEAN, false);
+                    return;
+                }
             }
         }
 
-        worldBorderManager.tpPlayerToNearestBlockInBorder(player);
-        player.sendMessage(LangUtilities.PLUGIN_PREFIX.append(Component.text(" ").append(LangUtilities.LEFT_AND_BORDER_SHRUNK)));
+        boolean teleportPlayersInsideBorder = config.getBoolean(ConfigKeys.TELEPORT_PLAYERS_INSIDE_BORDER.KEY);
+        if (teleportPlayersInsideBorder) {
+            worldBorderManager.tpPlayerToNearestBlockInBorder(player);
+            player.sendMessage(LangUtilities.PLUGIN_PREFIX.append(Component.text(" ").append(LangUtilities.LEFT_AND_BORDER_SHRUNK)));
+        }
     }
 
     @EventHandler
@@ -72,10 +79,10 @@ public class PlayerXPListeners implements Listener {
 
         if (!worldBorderManager.isLocationInsideBorder(player.getLocation())) {
             PersistentDataContainer playerData = player.getPersistentDataContainer();
-            playerData.set(PersistentDataContainerKeys.SHOULD_KILL_ON_JOIN.KEY, PersistentDataType.BOOLEAN, true);
+            playerData.set(PersistentDataContainerKeys.KILL_ON_JOIN.KEY, PersistentDataType.BOOLEAN, true);
         }
 
-        boolean updateBorderOnLeave = plugin.getConfig().getBoolean(ConfigKeys.UPDATE_BORDER_ON_LEAVE.KEY);
+        boolean updateBorderOnLeave = config.getBoolean(ConfigKeys.UPDATE_BORDER_ON_LEAVE.KEY);
 
         if (updateBorderOnLeave) {
             new BukkitRunnable() {
@@ -103,9 +110,18 @@ public class PlayerXPListeners implements Listener {
 
     @EventHandler
     public void onPlayerDeath(PlayerDeathEvent e) {
-        boolean shouldChangeDeathMessage = plugin.getConfig().getBoolean(ConfigKeys.SHOULD_CHANGE_DEATH_MESSAGE.KEY);
+        boolean shouldChangeDeathMessage = config.getBoolean(ConfigKeys.CHANGE_DEATH_MESSAGE.KEY);
         if (!shouldChangeDeathMessage) return;
-        Component deathMessage = e.deathMessage().append(Component.text(". They had ").append(Component.text(e.getPlayer().getLevel(), NamedTextColor.GREEN).append(Component.text(" levels.", NamedTextColor.WHITE))));
+        Player player = e.getPlayer();
+        Component deathMessage = e.deathMessage();
+        if (worldBorderManager.getCountdownTasks().containsKey(player)) {
+            boolean shouldExplode = config.getBoolean(ConfigKeys.PLAYERS_EXPLODE_ON_BORDER_DEATH.KEY);
+            if (shouldExplode) {
+                deathMessage = Component.text(player.getName() + " blew up after refusing to stay within the confines of this world");
+            }
+            worldBorderManager.getCountdownTasks().remove(player);
+        }
+        deathMessage = deathMessage.append(Component.text(". They had ").append(Component.text(e.getPlayer().getLevel(), NamedTextColor.GREEN).append(Component.text(" levels.", NamedTextColor.WHITE))));
         e.deathMessage(deathMessage);
     }
 
@@ -126,7 +142,7 @@ public class PlayerXPListeners implements Listener {
         Player player = e.getPlayer();
         World currentWorld = player.getWorld();
         PersistentDataContainer currentWorldData = currentWorld.getPersistentDataContainer();
-        boolean isInitialized = currentWorldData.has(WorldDataKeys.IS_INITIALIZED.KEY) ? currentWorldData.get(WorldDataKeys.IS_INITIALIZED.KEY, PersistentDataType.BOOLEAN) : false;
+        boolean isInitialized = currentWorldData.has(PersistentDataContainerKeys.IS_WORLD_INITIALIZED.KEY) ? currentWorldData.get(PersistentDataContainerKeys.IS_WORLD_INITIALIZED.KEY, PersistentDataType.BOOLEAN) : false;
 
         if (!isInitialized) {
             WorldBorder currentWorldBorder = currentWorld.getWorldBorder();
@@ -134,7 +150,21 @@ public class PlayerXPListeners implements Listener {
 
             currentWorldBorder.setSize(previousWorldBorder.getSize());
             currentWorldBorder.setCenter(player.getLocation());
-            currentWorldData.set(WorldDataKeys.IS_INITIALIZED.KEY, PersistentDataType.BOOLEAN, true);
+            currentWorldData.set(PersistentDataContainerKeys.IS_WORLD_INITIALIZED.KEY, PersistentDataType.BOOLEAN, true);
+        }
+    }
+
+    @EventHandler
+    public void onPlayerMove(PlayerMoveEvent e) {
+        Player player = e.getPlayer();
+        if (worldBorderManager.getCountdownTasks().containsKey(player)) return;
+        boolean isInBorder = worldBorderManager.isLocationInsideBorder(player.getLocation());
+        if (!isInBorder) {
+            int counter = config.getInt(ConfigKeys.OUTSIDE_BORDER_COUNTDOWN_TIME.KEY);
+            if (counter == 0) return;
+            KillCountdownTask countdownTask = new KillCountdownTask(player);
+            worldBorderManager.getCountdownTasks().put(player, countdownTask);
+            countdownTask.runTaskTimer(plugin, 0, 20);
         }
     }
 }

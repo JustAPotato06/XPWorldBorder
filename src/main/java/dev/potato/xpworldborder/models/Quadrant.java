@@ -4,7 +4,6 @@ import dev.potato.xpworldborder.utilities.enumerations.QuadrantType;
 import org.bukkit.Location;
 
 public record Quadrant(QuadrantType quadrantType, Location referenceLocation, Location center) {
-
     public static Quadrant getQuadrant(Location referenceLocation, Location center) {
         Quadrant quadrant;
         double referenceX = referenceLocation.getX();

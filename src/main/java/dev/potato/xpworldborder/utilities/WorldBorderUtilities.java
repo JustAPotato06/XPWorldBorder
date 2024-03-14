@@ -3,6 +3,7 @@ package dev.potato.xpworldborder.utilities;
 import dev.potato.xpworldborder.XPWorldBorder;
 import dev.potato.xpworldborder.configurations.LevelConfig;
 import dev.potato.xpworldborder.models.Quadrant;
+import dev.potato.xpworldborder.tasks.KillCountdownTask;
 import dev.potato.xpworldborder.tasks.WorldBordersUpdateTask;
 import dev.potato.xpworldborder.utilities.enumerations.configurations.ConfigKeys;
 import dev.potato.xpworldborder.utilities.enumerations.configurations.LevelConfigKeys;
@@ -13,6 +14,7 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.*;
 
+import java.util.HashMap;
 import java.util.UUID;
 
 public class WorldBorderUtilities {
@@ -20,9 +22,14 @@ public class WorldBorderUtilities {
     private final XPWorldBorder plugin = XPWorldBorder.getPlugin();
     private double currentTotalLevels;
     private WorldBordersUpdateTask currentUpdateTask;
+    private final HashMap<Player, KillCountdownTask> countdownTasks = new HashMap<>();
 
     public static WorldBorderUtilities getManager() {
         return manager;
+    }
+
+    public HashMap<Player, KillCountdownTask> getCountdownTasks() {
+        return countdownTasks;
     }
 
     public void updateBorders() {
@@ -40,7 +47,9 @@ public class WorldBorderUtilities {
         if (currentTotalLevels <= 1) currentTotalLevels = 2;
         if (currentUpdateTask != null) currentUpdateTask.cancel();
         currentUpdateTask = new WorldBordersUpdateTask(currentTotalLevels);
-        currentUpdateTask.runTaskTimer(plugin, 0, 10);
+        double speedSeconds = plugin.getConfig().getDouble(ConfigKeys.BORDER_UPDATE_SPEED.KEY);
+        long speedTicks = Math.round(speedSeconds * 20);
+        currentUpdateTask.runTaskTimer(plugin, 0, speedTicks);
     }
 
     public void givePlayerScoreboard(Player player) {
@@ -57,7 +66,7 @@ public class WorldBorderUtilities {
         World world = location.getWorld();
         WorldBorder worldBorder = world.getWorldBorder();
         Location worldBorderCenter = worldBorder.getCenter();
-        double radius = worldBorder.getSize() / 2;
+        double radius = (worldBorder.getSize() / 2) + 1;
         double distanceX = location.getX() - worldBorderCenter.getX();
         double distanceZ = location.getZ() - worldBorderCenter.getZ();
         return Math.abs(distanceX) < radius && Math.abs(distanceZ) < radius;
@@ -65,10 +74,12 @@ public class WorldBorderUtilities {
 
     public boolean isHighestLocationSafe(Location location) {
         Block block = toHighestLocationNoNetherRoof(location).getBlock();
+        Block blockAbove = block.getLocation().add(0, 1, 0).getBlock();
         return block.isSolid() &&
                 block.getType() != Material.MAGMA_BLOCK &&
-                block.getLocation().add(0, 1, 0).getBlock().getType() != Material.LAVA &&
-                block.getLocation().add(0, 1, 0).getBlock().getType() != Material.WATER;
+                blockAbove.getType() != Material.LAVA &&
+                blockAbove.getType() != Material.WATER &&
+                blockAbove.getType() != Material.FIRE;
     }
 
     public Location toHighestLocationNoNetherRoof(Location location) {
