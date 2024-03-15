@@ -21,11 +21,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.io.File;
 import java.util.ArrayList;
 
-/*
-TODO - Player glow
-TODO - Player glow color
-*/
-
 public final class XPWorldBorder extends JavaPlugin {
     private static XPWorldBorder plugin;
 

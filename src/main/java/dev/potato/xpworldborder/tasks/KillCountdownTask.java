@@ -7,14 +7,14 @@ import dev.potato.xpworldborder.utilities.enumerations.configurations.ConfigKeys
 import dev.potato.xpworldborder.utilities.enumerations.configurations.SoundConfigKeys;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import org.bukkit.Instrument;
-import org.bukkit.Note;
+import org.bukkit.Bukkit;
 import org.bukkit.Particle;
-import org.bukkit.Sound;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scoreboard.Scoreboard;
+import org.bukkit.scoreboard.Team;
 
 public class KillCountdownTask extends BukkitRunnable {
     private final XPWorldBorder plugin = XPWorldBorder.getPlugin();
@@ -23,10 +23,20 @@ public class KillCountdownTask extends BukkitRunnable {
     private final int initialValue = plugin.getConfig().getInt(ConfigKeys.OUTSIDE_BORDER_COUNTDOWN_TIME.KEY);
     private final int numberOfParticles = config.getInt(ConfigKeys.NUMBER_OF_PARTICLES_ON_EXPLOSION.KEY);
     private int counter = plugin.getConfig().getInt(ConfigKeys.OUTSIDE_BORDER_COUNTDOWN_TIME.KEY);
+    private KillCountdownSoundTask soundTask;
     private final Player player;
+    private NamedTextColor currentColor;
 
     public KillCountdownTask(Player player) {
         this.player = player;
+    }
+
+    public int getInitialValue() {
+        return initialValue;
+    }
+
+    public NamedTextColor getCurrentColor() {
+        return currentColor;
     }
 
     @Override
@@ -42,18 +52,22 @@ public class KillCountdownTask extends BukkitRunnable {
             return;
         }
 
-        NamedTextColor color = getColor();
+        currentColor = getColor();
         player.sendActionBar(
                 Component.text("You have ", NamedTextColor.GRAY)
-                        .append(Component.text(counter, color))
+                        .append(Component.text(counter, currentColor))
                         .append(Component.text(" seconds to reach the world border!", NamedTextColor.GRAY))
         );
 
-        sendTickSound(player);
-        for (Entity currentEntity : player.getNearbyEntities(50, 50, 50)) {
-            if (!(currentEntity instanceof Player currentPlayer)) continue;
-            sendTickSound(currentPlayer);
+        if (counter == initialValue) {
+            boolean playOutsideBorderSound = !SoundConfig.getConfig().getList(SoundConfigKeys.NO_SOUND_OUTSIDE_BORDER.KEY).contains(player.getName());
+            if (playOutsideBorderSound) {
+                soundTask = new KillCountdownSoundTask(player);
+                soundTask.runTaskTimer(plugin, 0, 1);
+            }
         }
+
+        makePlayerGlow(player, currentColor);
 
         counter--;
     }
@@ -72,6 +86,8 @@ public class KillCountdownTask extends BukkitRunnable {
         } else {
             worldBorderManager.getCountdownTasks().remove(player);
         }
+        soundTask.cancel();
+        turnOffPlayerGlow(player);
         this.cancel();
     }
 
@@ -94,17 +110,18 @@ public class KillCountdownTask extends BukkitRunnable {
         player.spawnParticle(Particle.FIREWORKS_SPARK, this.player.getLocation(), numberOfParticles);
     }
 
-    private void sendTickSound(Player player) {
-        boolean playTickSound = !SoundConfig.getConfig().getList(SoundConfigKeys.NO_SOUND_OUTSIDE_BORDER.KEY).contains(player.getName());
-        if (!playTickSound) return;
-        Player playerOutsideBorder = this.player;
-        player.playSound(this.player.getLocation(), Sound.UI_BUTTON_CLICK, 1, 1);
-        player.playNote(playerOutsideBorder.getLocation(), Instrument.BASS_DRUM, Note.natural(0, Note.Tone.C));
-        new BukkitRunnable() {
-            @Override
-            public void run() {
-                player.playNote(playerOutsideBorder.getLocation(), Instrument.BASS_DRUM, Note.natural(0, Note.Tone.C));
-            }
-        }.runTaskLater(plugin, 5);
+    private void makePlayerGlow(Player player, NamedTextColor color) {
+        player.setGlowing(true);
+        Scoreboard scoreboard = Bukkit.getScoreboardManager().getMainScoreboard();
+        Team team = scoreboard.getTeam(player.getName()) == null ? scoreboard.registerNewTeam(player.getName()) : scoreboard.getTeam(player.getName());
+        team.color(color);
+        team.addEntity(player);
+    }
+
+    private void turnOffPlayerGlow(Player player) {
+        player.setGlowing(false);
+        Scoreboard scoreboard = Bukkit.getScoreboardManager().getMainScoreboard();
+        Team team = scoreboard.getTeam(player.getName()) == null ? scoreboard.registerNewTeam(player.getName()) : scoreboard.getTeam(player.getName());
+        team.removeEntity(player);
     }
 }
