@@ -1,7 +1,6 @@
 package dev.potato.xpworldborder.tasks;
 
 import dev.potato.xpworldborder.utilities.WorldBorderUtilities;
-import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Instrument;
@@ -70,6 +69,7 @@ public class KillCountdownSoundTask extends BukkitRunnable {
         if (shouldOthersHear) {
             for (Entity currentEntity : player.getNearbyEntities(50, 50, 50)) {
                 if (!(currentEntity instanceof Player currentPlayer)) continue;
+                if (worldBorderManager.getCountdownTasks().containsKey(currentPlayer)) continue;
                 currentPlayer.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1, 1);
             }
         }
@@ -79,6 +79,7 @@ public class KillCountdownSoundTask extends BukkitRunnable {
         if (shouldOthersHear) {
             for (Entity currentEntity : player.getNearbyEntities(50, 50, 50)) {
                 if (!(currentEntity instanceof Player currentPlayer)) continue;
+                if (worldBorderManager.getCountdownTasks().containsKey(currentPlayer)) continue;
                 currentPlayer.playNote(player.getLocation(), Instrument.PLING, note);
             }
         }
