@@ -19,6 +19,7 @@ How long can you and your friends survive?
 Configuration is a big part of this plugin! Almost every feature is customizable, including:
 
 - Plugin messages
+- What level new players start at
 - The speed of the world border increasing/decreasing
 - Whether or not players are teleported inside the border after the border is shrunk while they're offline
 - Whether or not players die after leaving while outside the border
