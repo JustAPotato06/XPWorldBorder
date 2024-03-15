@@ -52,11 +52,13 @@ public class PlayerXPListeners implements Listener {
         if (worldBorderManager.isLocationInsideBorder(player.getLocation())) return;
 
         boolean killPlayersOutsideBorderOnLeave = config.getBoolean(ConfigKeys.KILL_PLAYERS_OUTSIDE_BORDER_ON_LEAVE.KEY);
+
         if (killPlayersOutsideBorderOnLeave) {
             PersistentDataContainer playerData = player.getPersistentDataContainer();
 
             if (playerData.has(PersistentDataContainerKeys.KILL_ON_JOIN.KEY)) {
                 boolean shouldKill = playerData.get(PersistentDataContainerKeys.KILL_ON_JOIN.KEY, PersistentDataType.BOOLEAN);
+
                 if (shouldKill) {
                     player.setHealth(0);
                     player.sendMessage(LangUtilities.PLUGIN_PREFIX.append(Component.text(" ").append(LangUtilities.LEFT_WHILE_OUTSIDE_BORDER)));
@@ -67,6 +69,7 @@ public class PlayerXPListeners implements Listener {
         }
 
         boolean teleportPlayersInsideBorder = config.getBoolean(ConfigKeys.TELEPORT_PLAYERS_INSIDE_BORDER.KEY);
+
         if (teleportPlayersInsideBorder) {
             worldBorderManager.tpPlayerToNearestBlockInBorder(player);
             player.sendMessage(LangUtilities.PLUGIN_PREFIX.append(Component.text(" ").append(LangUtilities.LEFT_AND_BORDER_SHRUNK)));

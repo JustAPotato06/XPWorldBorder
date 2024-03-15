@@ -53,6 +53,7 @@ public class OfflinePlayerLevelCheckTask extends BukkitRunnable {
                                                 .append(Component.text(" have been subtracted from all world borders.", NamedTextColor.RED)))
                                 ));
                     }
+
                     levelConfig.set(uuid + "." + LevelConfigKeys.LEVEL_AMOUNT.KEY, 0);
                     LevelConfig.save();
                     worldBorderManager.updateBorders();

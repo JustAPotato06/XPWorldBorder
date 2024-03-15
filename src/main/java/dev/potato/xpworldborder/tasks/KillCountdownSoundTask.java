@@ -23,9 +23,7 @@ public class KillCountdownSoundTask extends BukkitRunnable {
     public void run() {
         NamedTextColor currentColor = originatingTask.getCurrentColor();
 
-        if (counter == 1) {
-            player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1, 1);
-        }
+        if (counter == 1) player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1, 1);
 
         boolean onGreen = currentColor == NamedTextColor.GREEN && counter == 1;
         boolean onYellow = currentColor == NamedTextColor.YELLOW && (counter == 1 || counter == 11);
