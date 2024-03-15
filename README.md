@@ -34,3 +34,4 @@ Configuration is a big part of this plugin! Almost every feature is customizable
 # Upcoming Features
 
 - Will allow players to hear another player's countdown sound only if they are the closest to 0 out of all players with a countdown (to prevent sound overlap)
+- Will make border countdown tick sound more linear in its speed progression
