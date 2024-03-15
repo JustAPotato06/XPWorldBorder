@@ -37,6 +37,7 @@ Configuration is a big part of this plugin! Almost every feature is customizable
 - Will make border countdown tick sound more linear in its speed progression
 - Will remove the damage on the player being outside the border since the timer is implemented
 - A special item you can craft to allow you to go outside the border for a longer period while also being able to break and place blocks
+- Will make the starting level for each player configurable
 
 # Known Issues
 - Players can reset the countdown timer even while being outside the border.
