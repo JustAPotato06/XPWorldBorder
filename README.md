@@ -24,7 +24,7 @@ Configuration is a big part of this plugin! Almost every feature is customizable
 - Whether or not players die after leaving while outside the border
 - Whether the border updates when a player leaves (if not, levels are stored persistently)
 - Whether the levels stored persistently are wiped after some time
-- How long a player has to be offline for in order for their levels to be wiped and the border to be updated
+- How long does a player have to be offline for their levels to be wiped and the border to be updated
 - Whether or not players should be notified when an offline player's levels are wiped
 - Whether or not the death message of every player should include how many levels they had
 - Whether or not custom death messages should be added
@@ -35,3 +35,9 @@ Configuration is a big part of this plugin! Almost every feature is customizable
 
 - Will allow players to hear another player's countdown sound only if they are the closest to 0 out of all players with a countdown (to prevent sound overlap)
 - Will make border countdown tick sound more linear in its speed progression
+- Will remove the damage on the player being outside the border since the timer is implemented
+- A special item you can craft to allow you to go outside the border for a longer period while also being able to break and place blocks
+- Will make the starting level for each player configurable
+
+# Known Issues
+- Players can reset the countdown timer even while being outside the border.
