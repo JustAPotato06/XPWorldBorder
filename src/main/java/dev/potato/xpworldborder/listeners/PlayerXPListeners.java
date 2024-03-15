@@ -18,6 +18,7 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.persistence.PersistentDataContainer;
@@ -33,7 +34,8 @@ public class PlayerXPListeners implements Listener {
     public void onPlayerJoin(PlayerJoinEvent e) {
         Player player = e.getPlayer();
 
-        if (!player.hasPlayedBefore()) player.setLevel(5);
+        int startingLevel = config.getInt(ConfigKeys.STARTING_PLAYER_LEVEL.KEY);
+        if (!player.hasPlayedBefore()) player.setLevel(startingLevel);
 
         handlePlayerOutsideBorder(player);
 
@@ -49,7 +51,7 @@ public class PlayerXPListeners implements Listener {
     }
 
     private void handlePlayerOutsideBorder(Player player) {
-        if (worldBorderManager.isLocationInsideBorder(player.getLocation())) return;
+        if (worldBorderManager.isLocationInsideBorder(player.getLocation(), true)) return;
 
         boolean killPlayersOutsideBorderOnLeave = config.getBoolean(ConfigKeys.KILL_PLAYERS_OUTSIDE_BORDER_ON_LEAVE.KEY);
 
@@ -80,7 +82,7 @@ public class PlayerXPListeners implements Listener {
     public void onPlayerLeave(PlayerQuitEvent e) {
         Player player = e.getPlayer();
 
-        if (!worldBorderManager.isLocationInsideBorder(player.getLocation())) {
+        if (!worldBorderManager.isLocationInsideBorder(player.getLocation(), true)) {
             PersistentDataContainer playerData = player.getPersistentDataContainer();
             playerData.set(PersistentDataContainerKeys.KILL_ON_JOIN.KEY, PersistentDataType.BOOLEAN, true);
         }
@@ -161,7 +163,7 @@ public class PlayerXPListeners implements Listener {
     public void onPlayerMove(PlayerMoveEvent e) {
         Player player = e.getPlayer();
         if (worldBorderManager.getCountdownTasks().containsKey(player)) return;
-        boolean isInBorder = worldBorderManager.isLocationInsideBorder(player.getLocation());
+        boolean isInBorder = worldBorderManager.isLocationInsideBorder(player.getLocation(), true);
         if (!isInBorder) {
             int counter = config.getInt(ConfigKeys.OUTSIDE_BORDER_COUNTDOWN_TIME.KEY);
             if (counter == 0) return;
@@ -169,5 +171,14 @@ public class PlayerXPListeners implements Listener {
             worldBorderManager.getCountdownTasks().put(player, countdownTask);
             countdownTask.runTaskTimer(plugin, 0, 20);
         }
+    }
+
+    @EventHandler
+    public void onPlayerDamage(EntityDamageEvent e) {
+        if(!(e.getEntity() instanceof Player player)) return;
+        int countdownTime = config.getInt(ConfigKeys.OUTSIDE_BORDER_COUNTDOWN_TIME.KEY);
+        if(countdownTime == 0) return;
+        if(worldBorderManager.isLocationInsideBorder(player.getLocation(), true)) return;
+        e.setCancelled(true);
     }
 }

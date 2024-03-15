@@ -62,11 +62,11 @@ public class WorldBorderUtilities {
         player.setScoreboard(scoreboard);
     }
 
-    public boolean isLocationInsideBorder(Location location) {
+    public boolean isLocationInsideBorder(Location location, boolean addExtraBlock) {
         World world = location.getWorld();
         WorldBorder worldBorder = world.getWorldBorder();
         Location worldBorderCenter = worldBorder.getCenter();
-        double radius = (worldBorder.getSize() / 2) + 1;
+        double radius = addExtraBlock ? (worldBorder.getSize() / 2) + 1 : worldBorder.getSize() / 2;
         double distanceX = location.getX() - worldBorderCenter.getX();
         double distanceZ = location.getZ() - worldBorderCenter.getZ();
         return Math.abs(distanceX) < radius && Math.abs(distanceZ) < radius;
@@ -93,7 +93,7 @@ public class WorldBorderUtilities {
 
     public void tpPlayerToNearestBlockInBorder(Player player) {
         Location location = player.getLocation();
-        if (isLocationInsideBorder(location)) return;
+        if (isLocationInsideBorder(location, true)) return;
         Location worldBorderCenter = player.getWorld().getWorldBorder().getCenter();
         Quadrant playerQuadrant = Quadrant.getQuadrant(location, worldBorderCenter);
         int distanceToCenter = (int) Math.round(playerQuadrant.getDiagonalDistance());
@@ -105,10 +105,10 @@ public class WorldBorderUtilities {
                 case NEG_POS -> location.add(1, 0, 0).subtract(0, 0, 1);
                 default -> location;
             };
-            if (isLocationInsideBorder(location) && isHighestLocationSafe(location)) break;
+            if (isLocationInsideBorder(location, true) && isHighestLocationSafe(location)) break;
         }
         Location destination = toHighestLocationNoNetherRoof(location).add(0, 1, 0);
-        if (!isLocationInsideBorder(destination))
+        if (!isLocationInsideBorder(destination, true))
             destination = toHighestLocationNoNetherRoof(worldBorderCenter).add(0, 1, 0);
         player.teleport(destination);
     }

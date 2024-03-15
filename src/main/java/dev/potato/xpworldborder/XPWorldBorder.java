@@ -43,6 +43,9 @@ public final class XPWorldBorder extends JavaPlugin {
 
         // Tasks
         runTasks();
+
+        // Recipes
+        registerRecipes();
     }
 
     private void initializeConfiguration() {
@@ -105,7 +108,9 @@ public final class XPWorldBorder extends JavaPlugin {
             world.setGameRule(GameRule.DO_IMMEDIATE_RESPAWN, true);
             WorldBorder worldBorder = world.getWorldBorder();
             worldBorder.setCenter(world.getSpawnLocation());
-            worldBorder.setSize(5);
+            int startingWorldSize = getConfig().getInt(ConfigKeys.STARTING_PLAYER_LEVEL.KEY);
+            if (startingWorldSize <= 1) startingWorldSize = 2;
+            worldBorder.setSize(startingWorldSize);
             config.set(SetupConfigKeys.SHOULD_INITIALIZE_WORLDS.KEY, false);
             SetupConfig.save();
         }
@@ -125,5 +130,9 @@ public final class XPWorldBorder extends JavaPlugin {
         if (!updateBorderOnLeave && wipeOldLevelData) {
             new OfflinePlayerLevelCheckTask().runTaskTimer(this, 0, 100);
         }
+    }
+
+    private void registerRecipes() {
+        // TODO - Add special items
     }
 }

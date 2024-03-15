@@ -35,6 +35,10 @@ public class KillCountdownTask extends BukkitRunnable {
         return initialValue;
     }
 
+    public int getCounter() {
+        return counter;
+    }
+
     public NamedTextColor getCurrentColor() {
         return currentColor;
     }
@@ -44,7 +48,7 @@ public class KillCountdownTask extends BukkitRunnable {
         if (!player.isOnline()) {
             endTask(false);
             return;
-        } else if (worldBorderManager.isLocationInsideBorder(player.getLocation())) {
+        } else if (worldBorderManager.isLocationInsideBorder(player.getLocation(), false)) {
             endTask(false);
             return;
         } else if (counter == 0) {

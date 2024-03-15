@@ -4,6 +4,11 @@
 #                             #
 ###############################
 
+# This value determines what level each player who joins for the first time will start at
+# The default is 5
+# If you set this to 0, players will start with no levels and the world border size will be initialized to 2 blocks wide
+starting-player-level: 5
+
 # This is the time, in seconds, that the border will take to update once a player's level changes
 # The ratio for this value is the amount of seconds it takes to update PER EVERY BLOCK
 # The default is 0.2 (or 2/10 a second per block)

@@ -1,6 +1,7 @@
 package dev.potato.xpworldborder.utilities.enumerations.configurations;
 
 public enum ConfigKeys {
+    STARTING_PLAYER_LEVEL("starting-player-level"),
     BORDER_UPDATE_SPEED("border-update-speed"),
     OUTSIDE_BORDER_COUNTDOWN_TIME("outside-border-countdown-time"),
     PLAYERS_EXPLODE_ON_BORDER_DEATH("players-explode-on-border-death"),
