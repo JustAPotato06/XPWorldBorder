@@ -11,7 +11,7 @@ How long can you and your friends survive?
 - All world borders across all dimensions and worlds increase and decrease according to the constantly updating levels of the players on the server
 - If a player leaves the game while outside the border in an attempt to evade death, they will be killed upon server rejoin!
 - If a player leaves the game inside the border, but the border shrinks while they are gone, they will be teleported to the closest location that is inside the border (unless they left while the border was decreasing)
-- The world border increasing and decreasing makes sound! There is a command to toggle either the increasing sound, decreasing sound, or both! Using */togglesound*
+- The world border increasing and decreasing makes sound! There is a command to toggle either the increasing sound, decreasing sound, or both! Using */togglesound*. You can also use this to enable/disable all other plugin sounds.
 - If a player leaves the world border, a countdown will start. Once the countdown reaches 0, the player will die (or explode)
 - Special items can be crafted that allow players to be outside the world border for a longer period of time!
 
