@@ -20,15 +20,17 @@ public class KillCountdownTask extends BukkitRunnable {
     private final XPWorldBorder plugin = XPWorldBorder.getPlugin();
     private final WorldBorderUtilities worldBorderManager = WorldBorderUtilities.getManager();
     private final FileConfiguration config = plugin.getConfig();
-    private final int initialValue = plugin.getConfig().getInt(ConfigKeys.OUTSIDE_BORDER_COUNTDOWN_TIME.KEY);
     private final int numberOfParticles = config.getInt(ConfigKeys.NUMBER_OF_PARTICLES_ON_EXPLOSION.KEY);
-    private int counter = plugin.getConfig().getInt(ConfigKeys.OUTSIDE_BORDER_COUNTDOWN_TIME.KEY);
+    private final int initialValue;
+    private int counter;
     private KillCountdownSoundTask soundTask;
     private final Player player;
     private NamedTextColor currentColor;
 
-    public KillCountdownTask(Player player) {
+    public KillCountdownTask(Player player, int counter) {
         this.player = player;
+        this.counter = counter;
+        this.initialValue = counter;
     }
 
     public int getInitialValue() {

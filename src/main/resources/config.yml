@@ -15,6 +15,20 @@ starting-player-level: 5
 # If set to 0, the world border will update instantly
 border-update-speed: 0.2
 
+# If enabled, when a player leaves while inside the border, and comes back after the border has shrunk,
+# they will be teleported to the closest location inside the border!
+# The algorithm this feature uses is consistently updating! Please report any bugs you may find to the developers
+teleport-players-inside-border: true
+
+# If enabled, when a player leaves while outside the border in an attempt to evade death, they will be killed upon server rejoin
+kill-players-outside-border-on-leave: true
+
+###############################
+#                             #
+#          COUNTDOWN          #
+#                             #
+###############################
+
 # After a player leaves the border, a countdown will begin. Once it reaches 0, the player will die
 # This is how long the countdown should count down for in seconds
 # The default is 10 seconds (set to 0 to DISABLE the countdown)
@@ -28,13 +42,9 @@ players-explode-on-border-death: true
 # The default is 200
 number-of-particles-on-explosion: 200
 
-# If enabled, when a player leaves while inside the border, and comes back after the border has shrunk,
-# they will be teleported to the closest location inside the border!
-# The algorithm this feature uses is consistently updating! Please report any bugs you may find to the developers
-teleport-players-inside-border: true
-
-# If enabled, when a player leaves while outside the border in an attempt to evade death, they will be killed upon server rejoin
-kill-players-outside-border-on-leave: true
+# If the countdown is enabled, this will toggle whether players will be allowed to craft multiplier items that multiply the countdown time
+# Multipliers are: x2, x3 and x4
+enable-multiplier-items: true
 
 ###############################
 #                             #

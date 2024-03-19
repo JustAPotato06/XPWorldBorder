@@ -13,14 +13,19 @@ import java.util.concurrent.TimeUnit;
 public class WorldBordersUpdateTask extends BukkitRunnable {
     private final XPWorldBorder plugin = XPWorldBorder.getPlugin();
     private final double currentTotalLevels;
+    private boolean isIncrease;
 
     public WorldBordersUpdateTask(double currentTotalLevels) {
         this.currentTotalLevels = currentTotalLevels;
     }
 
+    public boolean isIncrease() {
+        return isIncrease;
+    }
+
     @Override
     public void run() {
-        boolean isIncrease = true;
+        isIncrease = true;
 
         for (World world : Bukkit.getWorlds()) {
             WorldBorder worldBorder = world.getWorldBorder();

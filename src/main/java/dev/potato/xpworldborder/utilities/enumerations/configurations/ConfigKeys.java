@@ -6,6 +6,7 @@ public enum ConfigKeys {
     OUTSIDE_BORDER_COUNTDOWN_TIME("outside-border-countdown-time"),
     PLAYERS_EXPLODE_ON_BORDER_DEATH("players-explode-on-border-death"),
     NUMBER_OF_PARTICLES_ON_EXPLOSION("number-of-particles-on-explosion"),
+    ENABLE_MULTIPLIER_ITEMS("enable-multiplier-items"),
     TELEPORT_PLAYERS_INSIDE_BORDER("teleport-players-inside-border"),
     KILL_PLAYERS_OUTSIDE_BORDER_ON_LEAVE("kill-players-outside-border-on-leave"),
     UPDATE_BORDER_ON_LEAVE("update-border-on-leave"),

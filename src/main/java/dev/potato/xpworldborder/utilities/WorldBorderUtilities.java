@@ -28,6 +28,10 @@ public class WorldBorderUtilities {
         return manager;
     }
 
+    public WorldBordersUpdateTask getCurrentUpdateTask() {
+        return currentUpdateTask;
+    }
+
     public HashMap<Player, KillCountdownTask> getCountdownTasks() {
         return countdownTasks;
     }

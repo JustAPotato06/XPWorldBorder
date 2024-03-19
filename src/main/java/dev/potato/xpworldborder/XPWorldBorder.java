@@ -6,16 +6,18 @@ import dev.potato.xpworldborder.configurations.LevelConfig;
 import dev.potato.xpworldborder.configurations.SetupConfig;
 import dev.potato.xpworldborder.configurations.SoundConfig;
 import dev.potato.xpworldborder.listeners.PlayerXPListeners;
+import dev.potato.xpworldborder.listeners.WorldBorderListeners;
 import dev.potato.xpworldborder.tasks.OfflinePlayerLevelCheckTask;
+import dev.potato.xpworldborder.utilities.ItemUtilities;
+import dev.potato.xpworldborder.utilities.enumerations.RecipeKeys;
 import dev.potato.xpworldborder.utilities.enumerations.configurations.ConfigKeys;
 import dev.potato.xpworldborder.utilities.enumerations.configurations.LangConfigKeys;
 import dev.potato.xpworldborder.utilities.enumerations.configurations.SetupConfigKeys;
 import dev.potato.xpworldborder.utilities.enumerations.configurations.SoundConfigKeys;
-import org.bukkit.Bukkit;
-import org.bukkit.GameRule;
-import org.bukkit.World;
-import org.bukkit.WorldBorder;
+import org.bukkit.*;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.inventory.RecipeChoice;
+import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
@@ -89,6 +91,7 @@ public final class XPWorldBorder extends JavaPlugin {
         langConfig.addDefault(LangConfigKeys.PLUGIN_PREFIX.KEY, "&2&l[XP World Border]&r");
         langConfig.addDefault(LangConfigKeys.LEFT_WHILE_OUTSIDE_BORDER.KEY, "&cYou left while outside the world border! You have been killed and sent back to spawn.");
         langConfig.addDefault(LangConfigKeys.LEFT_AND_BORDER_SHRUNK.KEY, "&aThe world border shrunk while you were gone! You've been teleported inside the border.");
+        langConfig.addDefault(LangConfigKeys.LEFT_WHILE_BORDER_DECREASING.KEY, "&cYou appear to have left while the border was decreasing! Because of this, you have not been teleported inside the world border.");
         langConfig.addDefault(LangConfigKeys.ALL_SOUNDS_ENABLED.KEY, "&aAll world border sounds have now been enabled!");
         langConfig.addDefault(LangConfigKeys.ALL_SOUNDS_DISABLED.KEY, "&cAll world border sounds have now been disabled!");
         langConfig.addDefault(LangConfigKeys.INCREASE_SOUNDS_ENABLED.KEY, "&aWorld border increase sounds have now been enabled!");
@@ -97,6 +100,9 @@ public final class XPWorldBorder extends JavaPlugin {
         langConfig.addDefault(LangConfigKeys.DECREASE_SOUNDS_DISABLED.KEY, "&cWorld border decrease sounds have now been disabled!");
         langConfig.addDefault(LangConfigKeys.OUTSIDE_BORDER_SOUNDS_ENABLED.KEY, "&aOutside world border tick sounds have now been enabled!");
         langConfig.addDefault(LangConfigKeys.OUTSIDE_BORDER_SOUNDS_DISABLED.KEY, "&cOutside world border tick sounds have now been disabled!");
+        langConfig.addDefault(LangConfigKeys.USED_X2_MULTIPLIER.KEY, "&a&lX2 BORDER MULTIPLIER USED!");
+        langConfig.addDefault(LangConfigKeys.USED_X3_MULTIPLIER.KEY, "&b&lX3 BORDER MULTIPLIER USED!");
+        langConfig.addDefault(LangConfigKeys.USED_X4_MULTIPLIER.KEY, "&6&lX4 BORDER MULTIPLIER USED!");
     }
 
     private void initializeWorlds() {
@@ -118,6 +124,7 @@ public final class XPWorldBorder extends JavaPlugin {
 
     private void registerListeners() {
         getServer().getPluginManager().registerEvents(new PlayerXPListeners(), this);
+        getServer().getPluginManager().registerEvents(new WorldBorderListeners(), this);
     }
 
     private void registerCommands() {
@@ -133,6 +140,46 @@ public final class XPWorldBorder extends JavaPlugin {
     }
 
     private void registerRecipes() {
-        // TODO - Add special items
+        FileConfiguration config = getConfig();
+        int countdownCounter = config.getInt(ConfigKeys.OUTSIDE_BORDER_COUNTDOWN_TIME.KEY);
+        boolean enableMultiplierItems = config.getBoolean(ConfigKeys.ENABLE_MULTIPLIER_ITEMS.KEY);
+
+        if (countdownCounter == 0 || !enableMultiplierItems) return;
+
+        // Countdown x2
+        ShapedRecipe countdownX2 = new ShapedRecipe(RecipeKeys.COUNTDOWN_X2.KEY, ItemUtilities.getCountdownX2Item());
+        countdownX2.shape(
+                "EDE",
+                "DPD",
+                "EDE"
+        );
+        countdownX2.setIngredient('E', Material.EMERALD);
+        countdownX2.setIngredient('D', Material.DIAMOND);
+        countdownX2.setIngredient('P', Material.ENDER_PEARL);
+        Bukkit.addRecipe(countdownX2);
+
+        // Countdown x3
+        ShapedRecipe countdownX3 = new ShapedRecipe(RecipeKeys.COUNTDOWN_X3.KEY, ItemUtilities.getCountdownX3Item());
+        countdownX3.shape(
+                "EDE",
+                "DPD",
+                "EDE"
+        );
+        countdownX3.setIngredient('E', Material.EMERALD_BLOCK);
+        countdownX3.setIngredient('D', Material.DIAMOND_BLOCK);
+        countdownX3.setIngredient('P', new RecipeChoice.ExactChoice(ItemUtilities.getCountdownX2Item()));
+        Bukkit.addRecipe(countdownX3);
+
+        // Countdown x4
+        ShapedRecipe countdownX4 = new ShapedRecipe(RecipeKeys.COUNTDOWN_X4.KEY, ItemUtilities.getCountdownX4Item());
+        countdownX4.shape(
+                "DDD",
+                "NPN",
+                "DDD"
+        );
+        countdownX4.setIngredient('D', Material.DIAMOND_BLOCK);
+        countdownX4.setIngredient('N', Material.NETHERITE_INGOT);
+        countdownX4.setIngredient('P', new RecipeChoice.ExactChoice(ItemUtilities.getCountdownX3Item()));
+        Bukkit.addRecipe(countdownX4);
     }
 }
