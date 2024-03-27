@@ -1,5 +1,6 @@
 package dev.potato.xpworldborder;
 
+import dev.potato.xpworldborder.commands.GiveSpecialItemCommand;
 import dev.potato.xpworldborder.commands.ToggleSoundCommand;
 import dev.potato.xpworldborder.configurations.LangConfig;
 import dev.potato.xpworldborder.configurations.LevelConfig;
@@ -129,6 +130,7 @@ public final class XPWorldBorder extends JavaPlugin {
 
     private void registerCommands() {
         getCommand("togglesound").setExecutor(new ToggleSoundCommand());
+        getCommand("givespecialitem").setExecutor(new GiveSpecialItemCommand());
     }
 
     private void runTasks() {

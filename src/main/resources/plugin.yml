@@ -10,3 +10,9 @@ commands:
     usage: /togglesound [sound name]
     aliases:
       - ts
+  givespecialitem:
+    description: Gives admins any special item they would like
+    usage: /givespecialitem [item name]
+    aliases:
+      - si
+    permission: op

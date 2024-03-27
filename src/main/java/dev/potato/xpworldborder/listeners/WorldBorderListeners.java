@@ -23,10 +23,7 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.entity.ProjectileHitEvent;
-import org.bukkit.event.player.PlayerChangedWorldEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerMoveEvent;
-import org.bukkit.event.player.PlayerRespawnEvent;
+import org.bukkit.event.player.*;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
@@ -88,20 +85,17 @@ public class WorldBorderListeners implements Listener {
     }
 
     @EventHandler
-    public void onPlayerMove(PlayerMoveEvent e) {
-        Player player = e.getPlayer();
-        handleKillCountdown(player);
-    }
-
-    @EventHandler
     public void onPlayerInteract(PlayerInteractEvent e) {
         Action action = e.getAction();
 
         if (action != Action.RIGHT_CLICK_AIR) return;
 
+        if (!worldBorderManager.isLocationInsideBorder(e.getPlayer().getLocation(), true)) return;
+
         Player player = e.getPlayer();
         PersistentDataContainer playerData = player.getPersistentDataContainer();
         ItemStack item = player.getInventory().getItemInMainHand();
+
         x2Item.setAmount(item.getAmount());
         x3Item.setAmount(item.getAmount());
         x4Item.setAmount(item.getAmount());
@@ -113,6 +107,12 @@ public class WorldBorderListeners implements Listener {
         } else if (item.equals(x4Item)) {
             playerData.set(PersistentDataContainerKeys.JUST_THREW_MULTIPLIER_X4.KEY, PersistentDataType.BOOLEAN, true);
         }
+    }
+
+    @EventHandler
+    public void onPlayerMove(PlayerMoveEvent e) {
+        Player player = e.getPlayer();
+        handleKillCountdown(player);
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
@@ -172,6 +172,7 @@ public class WorldBorderListeners implements Listener {
         boolean hasX4Multiplier = false;
 
         ItemStack item = player.getInventory().getItemInMainHand();
+
         x2Item.setAmount(item.getAmount());
         x3Item.setAmount(item.getAmount());
         x4Item.setAmount(item.getAmount());
@@ -238,5 +239,14 @@ public class WorldBorderListeners implements Listener {
         if (countdownTime == 0) return;
         if (worldBorderManager.isLocationInsideBorder(player.getLocation(), true)) return;
         e.setCancelled(true);
+    }
+
+    @EventHandler
+    public void onPlayerTeleport(PlayerTeleportEvent e) {
+        Player player = e.getPlayer();
+
+        if (!worldBorderManager.isLocationInsideBorder(player.getLocation(), true) && e.getCause() == PlayerTeleportEvent.TeleportCause.ENDER_PEARL) {
+            e.setCancelled(true);
+        }
     }
 }
