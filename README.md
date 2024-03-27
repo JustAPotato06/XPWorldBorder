@@ -35,9 +35,7 @@ Configuration is a big part of this plugin! Almost every feature is customizable
 - Whether or not special items that multiply the countdown time should be craftable
 
 # Upcoming Features
-
-- Will make special items that enable players to break and place blocks outside border
-- Will make admin commands that allow admins to recieve any special item they'd like
+None currently!
 
 # Known Issues
 None currently!
