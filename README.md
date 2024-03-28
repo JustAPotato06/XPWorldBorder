@@ -38,6 +38,7 @@ Configuration is a big part of this plugin! Almost every feature is customizable
 None currently!
 
 # Known Issues
-The glow on a Player remains after dying upon logging outside the border
-A strange issue causing a constant error in the console and freezing the timer for a player causing the timer to resume when stepping outside the border but still stay inside?
+
+- The glow on a Player remains after dying upon logging outside the border
+- A strange issue causing a constant error in the console and freezing the timer for a player causing the timer to resume when stepping outside the border but still stay inside?
 
