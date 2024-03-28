@@ -20,7 +20,7 @@ How long can you and your friends survive?
 Configuration is a big part of this plugin! Almost every feature is customizable, including:
 
 - Plugin messages
-- What level new players start at
+- What level do new players start at
 - The speed of the world border increasing/decreasing
 - Whether or not players are teleported inside the border after the border is shrunk while they're offline
 - Whether or not players die after leaving while outside the border
@@ -38,4 +38,6 @@ Configuration is a big part of this plugin! Almost every feature is customizable
 None currently!
 
 # Known Issues
-None currently!
+The glow on a Player remains after dying upon logging outside the border
+A strange issue causing a constant error in the console and freezing the timer for a player causing the timer to resume when stepping outside the border but still stay inside?
+
